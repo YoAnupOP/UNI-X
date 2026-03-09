@@ -1,0 +1,12 @@
+{
+  "gridDisplay": "grid",
+  "gridHeight": "114px",
+  "cardHeight": "114px",
+  "cardBoxSizing": "border-box",
+  "cardPadding": "20px",
+  "cardMinHeight": "auto",
+  "cardMaxHeight": "none",
+  "cardFlex": "0 1 auto",
+  "cardDisplay": "block",
+  "cardFlexDirection": "row"
+}
