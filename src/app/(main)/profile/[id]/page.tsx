@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/providers/AuthProvider'
 import { Profile, Post } from '@/lib/types'
+import { useCachedQuery } from '@/lib/useCachedQuery'
 import {
     Edit3, MapPin, GraduationCap, Calendar, UserPlus, UserCheck, Loader2, X, Save, Share2, MessageCircle, Check
 } from 'lucide-react'
@@ -14,13 +15,52 @@ export default function ProfilePage() {
     const router = useRouter()
     const profileId = params.id as string
     const { user, refreshProfile, loading: authLoading } = useAuth()
-    const [profile, setProfile] = useState<Profile | null>(null)
-    const [posts, setPosts] = useState<(Post & { author: Profile })[]>([])
-    const [loading, setLoading] = useState(true)
-    const [isOwnProfile, setIsOwnProfile] = useState(false)
-    const [isFollowing, setIsFollowing] = useState(false)
-    const [followersCount, setFollowersCount] = useState(0)
-    const [followingCount, setFollowingCount] = useState(0)
+    const supabase = createClient()
+
+    type ProfileCacheData = {
+        profile: Profile | null
+        posts: (Post & { author: Profile })[]
+        followersCount: number
+        followingCount: number
+        isFollowing: boolean
+    }
+
+    const fetchProfileData = useCallback(async (): Promise<ProfileCacheData | null> => {
+        const queries: any[] = [
+            supabase.from('profiles').select('*').eq('id', profileId).single(),
+            supabase.from('posts').select('*, author:profiles(*)').eq('author_id', profileId).order('created_at', { ascending: false }).limit(20),
+            supabase.from('followers').select('*', { count: 'exact', head: true }).eq('following_id', profileId),
+            supabase.from('followers').select('*', { count: 'exact', head: true }).eq('follower_id', profileId),
+        ]
+        if (user && user.id !== profileId) {
+            queries.push(supabase.from('followers').select('id').eq('follower_id', user.id).eq('following_id', profileId).single())
+        }
+
+        const results = await Promise.all(queries) as { data: unknown; count?: number | null }[]
+
+        return {
+            profile: results[0].data as Profile | null,
+            posts: (results[1].data as (Post & { author: Profile })[]) || [],
+            followersCount: results[2].count || 0,
+            followingCount: results[3].count || 0,
+            isFollowing: user && user.id !== profileId && results[4] ? !!results[4].data : false,
+        }
+    }, [profileId, user, supabase])
+
+    const { data: profileData, setData: setProfileData, isLoading: loading, refresh: refreshProfilePage } = useCachedQuery<ProfileCacheData>(
+        `profile-${profileId}`,
+        fetchProfileData,
+        { profile: null, posts: [], followersCount: 0, followingCount: 0, isFollowing: false },
+        { enabled: !authLoading }
+    )
+
+    const profile = profileData.profile
+    const posts = profileData.posts
+    const isFollowing = profileData.isFollowing
+    const followersCount = profileData.followersCount
+    const followingCount = profileData.followingCount
+    const isOwnProfile = user?.id === profileId
+
     const [editing, setEditing] = useState(false)
     const [editData, setEditData] = useState({ full_name: '', display_name: '', bio: '', university: '', department: '', year: '', skills: '', interests: '' })
     const [saving, setSaving] = useState(false)
@@ -29,71 +69,47 @@ export default function ProfilePage() {
     const [showFollowersModal, setShowFollowersModal] = useState<'followers' | 'following' | null>(null)
     const [followersList, setFollowersList] = useState<Profile[]>([])
     const [loadingList, setLoadingList] = useState(false)
-    const supabase = createClient()
 
-    const fetchProfile = useCallback(async () => {
-        try {
-            // Run ALL queries in parallel for instant loading
-            const queries: any[] = [
-                supabase.from('profiles').select('*').eq('id', profileId).single(),
-                supabase.from('posts').select('*, author:profiles(*)').eq('author_id', profileId).order('created_at', { ascending: false }).limit(20),
-                supabase.from('followers').select('*', { count: 'exact', head: true }).eq('following_id', profileId),
-                supabase.from('followers').select('*', { count: 'exact', head: true }).eq('follower_id', profileId),
-            ]
-            if (user && user.id !== profileId) {
-                queries.push(supabase.from('followers').select('id').eq('follower_id', user.id).eq('following_id', profileId).single())
-            }
-
-            const results = await Promise.all(queries) as { data: unknown; count?: number | null }[]
-
-            const profileData = results[0].data as Profile | null
-            const userPosts = results[1].data as (Post & { author: Profile })[] | null
-            const followersCount = results[2].count
-            const followingCount = results[3].count
-
-            if (profileData) {
-                setProfile(profileData)
-                setIsOwnProfile(user?.id === profileId)
-                setEditData({
-                    full_name: profileData.full_name || '',
-                    display_name: profileData.display_name || '',
-                    bio: profileData.bio || '',
-                    university: profileData.university || '',
-                    department: profileData.department || '',
-                    year: profileData.year || '',
-                    skills: (profileData.skills || []).join(', '),
-                    interests: (profileData.interests || []).join(', '),
-                })
-            }
-
-            if (userPosts) setPosts(userPosts)
-            setFollowersCount(followersCount || 0)
-            setFollowingCount(followingCount || 0)
-
-            if (user && user.id !== profileId && results[4]) {
-                setIsFollowing(!!results[4].data)
-            }
-        } catch (e) {
-            console.error('Failed to fetch profile:', e)
-        } finally {
-            setLoading(false)
-        }
-    }, [profileId, user])
-
+    // Sync edit form data when profile loads (skip if user is actively editing)
     useEffect(() => {
-        if (!authLoading) fetchProfile()
-    }, [fetchProfile, authLoading])
+        if (profileData.profile && !editing) {
+            setEditData({
+                full_name: profileData.profile.full_name || '',
+                display_name: profileData.profile.display_name || '',
+                bio: profileData.profile.bio || '',
+                university: profileData.profile.university || '',
+                department: profileData.profile.department || '',
+                year: profileData.profile.year || '',
+                skills: (profileData.profile.skills || []).join(', '),
+                interests: (profileData.profile.interests || []).join(', '),
+            })
+        }
+    }, [profileData.profile, editing])
 
     const handleFollow = async () => {
         if (!user) return
-        if (isFollowing) {
-            await supabase.from('followers').delete().eq('follower_id', user.id).eq('following_id', profileId)
-            setIsFollowing(false)
-            setFollowersCount(prev => prev - 1)
-        } else {
-            await supabase.from('followers').insert({ follower_id: user.id, following_id: profileId })
-            setIsFollowing(true)
-            setFollowersCount(prev => prev + 1)
+        const wasFollowing = profileData.isFollowing
+
+        // Optimistic update — instant UI response
+        setProfileData(prev => ({
+            ...prev,
+            isFollowing: !wasFollowing,
+            followersCount: prev.followersCount + (wasFollowing ? -1 : 1)
+        }))
+
+        try {
+            if (wasFollowing) {
+                await supabase.from('followers').delete().eq('follower_id', user.id).eq('following_id', profileId)
+            } else {
+                await supabase.from('followers').insert({ follower_id: user.id, following_id: profileId })
+            }
+        } catch {
+            // Rollback on failure
+            setProfileData(prev => ({
+                ...prev,
+                isFollowing: wasFollowing,
+                followersCount: prev.followersCount + (wasFollowing ? 1 : -1)
+            }))
         }
     }
 
@@ -113,7 +129,7 @@ export default function ProfilePage() {
         setEditing(false)
         setSaving(false)
         await refreshProfile()
-        fetchProfile()
+        refreshProfilePage(true)
     }
 
     const handleShare = () => {

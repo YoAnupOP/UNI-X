@@ -19,7 +19,8 @@ import {
     Check,
 } from 'lucide-react'
 import { uploadImage } from '@/lib/upload'
-import { getStaleCache, setCache, isCacheFresh } from '@/lib/cache'
+import { setCache } from '@/lib/cache'
+import { useCachedQuery } from '@/lib/useCachedQuery'
 import Link from 'next/link'
 
 function timeAgo(date: string) {
@@ -306,12 +307,28 @@ function SuggestionsWidget({ currentUser, profile }: { currentUser: string; prof
     }, [currentUser, profile])
 
     const handleFollow = async (id: string) => {
-        if (followedIds.has(id)) {
-            await supabase.from('followers').delete().eq('follower_id', currentUser).eq('following_id', id)
-            setFollowedIds(prev => { const n = new Set(prev); n.delete(id); return n })
-        } else {
-            await supabase.from('followers').insert({ follower_id: currentUser, following_id: id })
-            setFollowedIds(prev => new Set(prev).add(id))
+        const wasFollowed = followedIds.has(id)
+
+        // Optimistic update — instant UI response
+        setFollowedIds(prev => {
+            const n = new Set(prev)
+            wasFollowed ? n.delete(id) : n.add(id)
+            return n
+        })
+
+        try {
+            if (wasFollowed) {
+                await supabase.from('followers').delete().eq('follower_id', currentUser).eq('following_id', id)
+            } else {
+                await supabase.from('followers').insert({ follower_id: currentUser, following_id: id })
+            }
+        } catch {
+            // Rollback on failure
+            setFollowedIds(prev => {
+                const n = new Set(prev)
+                wasFollowed ? n.add(id) : n.delete(id)
+                return n
+            })
         }
     }
 
@@ -369,43 +386,32 @@ function SuggestionsWidget({ currentUser, profile }: { currentUser: string; prof
 
 export default function FeedPage() {
     const { user, profile, loading: authLoading } = useAuth()
-    // Show stale data immediately (no loading flash), fresh cache within 5min skips fetch entirely
-    const [posts, setPosts] = useState<(Post & { author: Profile })[]>(() => getStaleCache('feed-posts') || [])
-    const [loading, setLoading] = useState(() => !getStaleCache('feed-posts'))
+    const supabase = createClient()
+
+    const fetchPostsData = useCallback(async () => {
+        const { data: postsData } = await supabase
+            .from('posts').select('*, author:profiles(*)').order('created_at', { ascending: false }).limit(50)
+
+        if (postsData && user) {
+            const { data: likedPosts } = await supabase.from('likes').select('post_id').eq('user_id', user.id)
+            const likedIds = new Set(likedPosts?.map(l => l.post_id))
+            return postsData.map(p => ({ ...p, is_liked: likedIds.has(p.id) })) as (Post & { author: Profile })[]
+        }
+        return (postsData as (Post & { author: Profile })[]) ?? null
+    }, [user, supabase])
+
+    const { data: posts, setData: setPosts, isLoading: loading, refresh: refreshPosts } = useCachedQuery(
+        'feed-posts',
+        fetchPostsData,
+        [] as (Post & { author: Profile })[],
+        { enabled: !authLoading }
+    )
     const [newPostContent, setNewPostContent] = useState('')
     const [imageFile, setImageFile] = useState<File | null>(null)
     const [imagePreview, setImagePreview] = useState<string | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
     const [showCreatePost, setShowCreatePost] = useState(false)
     const [posting, setPosting] = useState(false)
-    const supabase = createClient()
-
-    const fetchPosts = useCallback(async (skipIfFresh = false) => {
-        if (skipIfFresh && isCacheFresh('feed-posts')) return
-        try {
-            const { data: postsData } = await supabase
-                .from('posts').select('*, author:profiles(*)').order('created_at', { ascending: false }).limit(50)
-
-            if (postsData && user) {
-                const { data: likedPosts } = await supabase.from('likes').select('post_id').eq('user_id', user.id)
-                const likedIds = new Set(likedPosts?.map(l => l.post_id))
-                const result = postsData.map(p => ({ ...p, is_liked: likedIds.has(p.id) })) as (Post & { author: Profile })[]
-                setPosts(result)
-                setCache('feed-posts', result)
-            } else if (postsData) {
-                setPosts(postsData as (Post & { author: Profile })[])
-                setCache('feed-posts', postsData)
-            }
-        } catch (e) {
-            console.error('Failed to fetch posts:', e)
-        } finally {
-            setLoading(false)
-        }
-    }, [user, supabase])
-
-    useEffect(() => {
-        if (!authLoading) fetchPosts(true)
-    }, [fetchPosts, authLoading])
 
     // Real-time subscription for new posts, updates, and deletes
     useEffect(() => {
@@ -494,7 +500,7 @@ export default function FeedPage() {
             setImageFile(null)
             setImagePreview(null)
             setShowCreatePost(false)
-            fetchPosts()
+            refreshPosts(true)
         }
         setPosting(false)
     }

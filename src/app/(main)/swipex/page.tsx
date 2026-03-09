@@ -6,16 +6,14 @@ import { useAuth } from '@/components/providers/AuthProvider'
 import { Profile } from '@/lib/types'
 import { Heart, X, Sparkles, MessageCircle, Loader2, RefreshCw, GraduationCap, MapPin, ArrowLeft, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
-import { getStaleCache, setCache, isCacheFresh } from '@/lib/cache'
+import { useCachedQuery } from '@/lib/useCachedQuery'
 
 export default function SwipeXPage() {
     const { user, profile: myProfile, loading: authLoading } = useAuth()
-    const [candidates, setCandidates] = useState<Profile[]>(() => getStaleCache('swipex-candidates') || [])
+    const supabase = createClient()
     const [currentIndex, setCurrentIndex] = useState(0)
-    const [loading, setLoading] = useState(() => !getStaleCache('swipex-candidates'))
     const [showMatch, setShowMatch] = useState<Profile | null>(null)
     const [swiping, setSwiping] = useState(false)
-    const supabase = createClient()
 
     // Drag state
     const cardRef = useRef<HTMLDivElement>(null)
@@ -24,33 +22,26 @@ export default function SwipeXPage() {
     const [isDragging, setIsDragging] = useState(false)
     const [flyOff, setFlyOff] = useState<'left' | 'right' | null>(null)
 
-    const fetchCandidates = useCallback(async (skipIfFresh = false) => {
-        if (!user) { setLoading(false); return }
-        if (skipIfFresh && isCacheFresh('swipex-candidates')) { setLoading(false); return }
-        setLoading(true)
-        try {
-            const { data: swiped } = await supabase.from('swipe_actions').select('swiped_id').eq('swiper_id', user.id)
-            const swipedIds = swiped?.map(s => s.swiped_id) || []
+    const fetchCandidatesData = useCallback(async () => {
+        if (!user) return null
+        const { data: swiped } = await supabase.from('swipe_actions').select('swiped_id').eq('swiper_id', user.id)
+        const swipedIds = swiped?.map(s => s.swiped_id) || []
 
-            let query = supabase.from('profiles').select('*').neq('id', user.id).eq('is_public', true).eq('profile_completed', true).limit(30)
-            if (swipedIds.length > 0) {
-                query = query.not('id', 'in', `(${swipedIds.join(',')})`)
-            }
-
-            const { data } = await query
-            setCandidates(data as Profile[] || [])
-            setCache('swipex-candidates', data || [])
-            setCurrentIndex(0)
-        } catch (e) {
-            console.error('Failed to fetch candidates:', e)
-        } finally {
-            setLoading(false)
+        let query = supabase.from('profiles').select('*').neq('id', user.id).eq('is_public', true).eq('profile_completed', true).limit(30)
+        if (swipedIds.length > 0) {
+            query = query.not('id', 'in', `(${swipedIds.join(',')})`)
         }
+
+        const { data } = await query
+        return (data as Profile[]) || null
     }, [user, supabase])
 
-    useEffect(() => {
-        if (!authLoading) fetchCandidates(true)
-    }, [fetchCandidates, authLoading])
+    const { data: candidates, setData: setCandidates, isLoading: loading, refresh: refreshCandidates } = useCachedQuery(
+        'swipex-candidates',
+        fetchCandidatesData,
+        [] as Profile[],
+        { enabled: !authLoading }
+    )
 
     // Keyboard shortcuts
     useEffect(() => {
@@ -181,7 +172,7 @@ export default function SwipeXPage() {
                         You&apos;ve seen everyone available right now.<br />Check back later for new faces!
                     </p>
                     <button
-                        onClick={() => fetchCandidates()}
+                        onClick={() => refreshCandidates(true)}
                         className="hover-lift"
                         style={{
                             display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '14px 28px',

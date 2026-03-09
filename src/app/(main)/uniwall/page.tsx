@@ -6,62 +6,68 @@ import { useAuth } from '@/components/providers/AuthProvider'
 import { WallPost, Profile } from '@/lib/types'
 import { Heart, Plus, ImagePlus, Loader2, Lock, Globe, X } from 'lucide-react'
 import { uploadImage } from '@/lib/upload'
-import { getStaleCache, setCache, isCacheFresh } from '@/lib/cache'
+import { useCachedQuery } from '@/lib/useCachedQuery'
 
 export default function UniWallPage() {
     const { user, loading: authLoading } = useAuth()
-    const [posts, setPosts] = useState<(WallPost & { author: Profile })[]>(() => getStaleCache('uniwall-posts') || [])
-    const [loading, setLoading] = useState(() => !getStaleCache('uniwall-posts'))
+    const supabase = createClient()
     const [showCreate, setShowCreate] = useState(false)
     const [newPost, setNewPost] = useState({ content: '', visibility: 'public' })
     const [imageFile, setImageFile] = useState<File | null>(null)
     const [imagePreview, setImagePreview] = useState<string | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
     const [creating, setCreating] = useState(false)
-    const supabase = createClient()
 
-    const fetchPosts = useCallback(async (skipIfFresh = false) => {
-        if (skipIfFresh && isCacheFresh('uniwall-posts')) { setLoading(false); return }
-        try {
-            const { data } = await supabase
-                .from('wall_posts')
-                .select('*, author:profiles(*)')
-                .order('created_at', { ascending: false })
+    const fetchPostsData = useCallback(async () => {
+        const { data } = await supabase
+            .from('wall_posts')
+            .select('*, author:profiles(*)')
+            .order('created_at', { ascending: false })
 
-            if (data && user) {
-                const { data: likes } = await supabase.from('wall_likes').select('wall_post_id').eq('user_id', user.id)
-                const likedIds = new Set(likes?.map(l => l.wall_post_id))
-                const result = data.map(p => ({ ...p, is_liked: likedIds.has(p.id) })) as (WallPost & { author: Profile })[]
-                setPosts(result)
-                setCache('uniwall-posts', result)
-            } else if (data) {
-                setPosts(data as (WallPost & { author: Profile })[])
-                setCache('uniwall-posts', data)
-            }
-        } catch (e) {
-            console.error('Failed to fetch wall posts:', e)
-        } finally {
-            setLoading(false)
+        if (data && user) {
+            const { data: likes } = await supabase.from('wall_likes').select('wall_post_id').eq('user_id', user.id)
+            const likedIds = new Set(likes?.map(l => l.wall_post_id))
+            return data.map(p => ({ ...p, is_liked: likedIds.has(p.id) })) as (WallPost & { author: Profile })[]
         }
+        return (data as (WallPost & { author: Profile })[]) ?? null
     }, [user, supabase])
 
-    useEffect(() => {
-        if (!authLoading) fetchPosts(true)
-    }, [fetchPosts, authLoading])
+    const { data: posts, setData: setPosts, isLoading: loading, refresh: refreshPosts } = useCachedQuery(
+        'uniwall-posts',
+        fetchPostsData,
+        [] as (WallPost & { author: Profile })[],
+        { enabled: !authLoading }
+    )
 
     const handleLike = async (postId: string) => {
         if (!user) return
         const post = posts.find(p => p.id === postId)
         if (!post) return
 
-        if (post.is_liked) {
-            await supabase.from('wall_likes').delete().eq('wall_post_id', postId).eq('user_id', user.id)
-            await supabase.from('wall_posts').update({ likes_count: post.likes_count - 1 }).eq('id', postId)
-            setPosts(posts.map(p => p.id === postId ? { ...p, is_liked: false, likes_count: p.likes_count - 1 } : p))
-        } else {
-            await supabase.from('wall_likes').insert({ wall_post_id: postId, user_id: user.id })
-            await supabase.from('wall_posts').update({ likes_count: post.likes_count + 1 }).eq('id', postId)
-            setPosts(posts.map(p => p.id === postId ? { ...p, is_liked: true, likes_count: p.likes_count + 1 } : p))
+        const wasLiked = post.is_liked
+        const newLiked = !wasLiked
+        const countDelta = newLiked ? 1 : -1
+
+        // Optimistic update — instant UI response
+        setPosts(prev => prev.map(p => p.id === postId
+            ? { ...p, is_liked: newLiked, likes_count: p.likes_count + countDelta }
+            : p
+        ))
+
+        try {
+            if (wasLiked) {
+                await supabase.from('wall_likes').delete().eq('wall_post_id', postId).eq('user_id', user.id)
+                await supabase.from('wall_posts').update({ likes_count: post.likes_count - 1 }).eq('id', postId)
+            } else {
+                await supabase.from('wall_likes').insert({ wall_post_id: postId, user_id: user.id })
+                await supabase.from('wall_posts').update({ likes_count: post.likes_count + 1 }).eq('id', postId)
+            }
+        } catch {
+            // Rollback on failure
+            setPosts(prev => prev.map(p => p.id === postId
+                ? { ...p, is_liked: wasLiked, likes_count: post.likes_count }
+                : p
+            ))
         }
     }
 
@@ -90,7 +96,7 @@ export default function UniWallPage() {
         setImagePreview(null)
         setShowCreate(false)
         setCreating(false)
-        fetchPosts()
+        refreshPosts(true)
     }
 
     return (

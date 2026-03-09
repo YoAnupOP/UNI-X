@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useLayoutEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/providers/AuthProvider'
 import { useRouter } from 'next/navigation'
@@ -51,14 +51,16 @@ export default function AdminPage() {
     const [activeTab, setActiveTab] = useState<Tab>('overview')
 
     // ── Overview ──
-    const [stats, setStats] = useState(() =>
-        getStaleCache<{ users: number; posts: number; clubs: number; events: number }>('admin-stats')
-        || { users: 0, posts: 0, clubs: 0, events: 0 }
-    )
+    const [stats, setStats] = useState({ users: 0, posts: 0, clubs: 0, events: 0 })
     const [recentUsers, setRecentUsers] = useState<Profile[]>([])
     const [recentPosts, setRecentPosts] = useState<Post[]>([])
     const [recentAnnouncements, setRecentAnnouncements] = useState<Announcement[]>([])
-    const [loading, setLoading] = useState(() => !getStaleCache('admin-stats'))
+    const [loading, setLoading] = useState(true)
+
+    useLayoutEffect(() => {
+        const cached = getStaleCache<{ users: number; posts: number; clubs: number; events: number }>('admin-stats')
+        if (cached) { setStats(cached); setLoading(false) }
+    }, [])
 
     // ── Users ──
     const [users, setUsers] = useState<Profile[]>([])

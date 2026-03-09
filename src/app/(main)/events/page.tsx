@@ -5,66 +5,72 @@ import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/providers/AuthProvider'
 import { Event } from '@/lib/types'
 import { Calendar, MapPin, Users, Plus, Clock, Loader2 } from 'lucide-react'
-import { getStaleCache, setCache, isCacheFresh } from '@/lib/cache'
+import { useCachedQuery } from '@/lib/useCachedQuery'
 
 export default function EventsPage() {
     const { user, loading: authLoading } = useAuth()
-    const [events, setEvents] = useState<Event[]>(() => getStaleCache('events-data') || [])
-    const [loading, setLoading] = useState(() => !getStaleCache('events-data'))
+    const supabase = createClient()
     const [showCreate, setShowCreate] = useState(false)
     const [creating, setCreating] = useState(false)
     const [newEvent, setNewEvent] = useState({ title: '', description: '', location: '', start_date: '', end_date: '' })
-    const supabase = createClient()
 
-    const fetchEvents = useCallback(async (skipIfFresh = false) => {
-        if (skipIfFresh && isCacheFresh('events-data')) { setLoading(false); return }
-        try {
-            const { data } = await supabase
-                .from('events')
-                .select('*, organizer:profiles(*)')
-                .eq('is_active', true)
-                .order('start_date', { ascending: true })
+    const fetchEventsData = useCallback(async () => {
+        const { data } = await supabase
+            .from('events')
+            .select('*, organizer:profiles(*)')
+            .eq('is_active', true)
+            .order('start_date', { ascending: true })
 
-            if (data && user) {
-                const { data: rsvps } = await supabase.from('event_rsvps').select('event_id, status').eq('user_id', user.id)
-                const rsvpMap = new Map(rsvps?.map(r => [r.event_id, r.status]))
-                const result = data.map(e => ({ ...e, rsvp_status: rsvpMap.get(e.id) || null })) as Event[]
-                setEvents(result)
-                setCache('events-data', result)
-            } else if (data) {
-                setEvents(data as Event[])
-                setCache('events-data', data)
-            }
-        } catch (e) {
-            console.error('Failed to fetch events:', e)
-        } finally {
-            setLoading(false)
+        if (data && user) {
+            const { data: rsvps } = await supabase.from('event_rsvps').select('event_id, status').eq('user_id', user.id)
+            const rsvpMap = new Map(rsvps?.map(r => [r.event_id, r.status]))
+            return data.map(e => ({ ...e, rsvp_status: rsvpMap.get(e.id) || null })) as Event[]
         }
+        return (data as Event[]) ?? null
     }, [user, supabase])
 
-    useEffect(() => {
-        if (!authLoading) fetchEvents(true)
-    }, [fetchEvents, authLoading])
+    const { data: events, setData: setEvents, isLoading: loading, refresh: refreshEvents } = useCachedQuery(
+        'events-data',
+        fetchEventsData,
+        [] as Event[],
+        { enabled: !authLoading }
+    )
 
     const handleRsvp = async (eventId: string, status: string) => {
         if (!user) return
         const event = events.find(e => e.id === eventId)
         if (!event) return
 
-        if (event.rsvp_status) {
-            await supabase.from('event_rsvps').update({ status }).eq('event_id', eventId).eq('user_id', user.id)
-            if (event.rsvp_status !== 'going' && status === 'going') {
-                await supabase.from('events').update({ rsvp_count: event.rsvp_count + 1 }).eq('id', eventId)
-            } else if (event.rsvp_status === 'going' && status !== 'going') {
-                await supabase.from('events').update({ rsvp_count: event.rsvp_count - 1 }).eq('id', eventId)
+        const prevStatus = event.rsvp_status
+        const prevCount = event.rsvp_count
+
+        // Calculate new RSVP count
+        let newCount = prevCount
+        if (prevStatus === 'going' && status !== 'going') newCount--
+        else if (prevStatus !== 'going' && status === 'going') newCount++
+
+        // Optimistic update — instant UI response
+        setEvents(prev => prev.map(e => e.id === eventId
+            ? { ...e, rsvp_status: status, rsvp_count: newCount } as Event
+            : e
+        ))
+
+        try {
+            if (prevStatus) {
+                await supabase.from('event_rsvps').update({ status }).eq('event_id', eventId).eq('user_id', user.id)
+            } else {
+                await supabase.from('event_rsvps').insert({ event_id: eventId, user_id: user.id, status })
             }
-        } else {
-            await supabase.from('event_rsvps').insert({ event_id: eventId, user_id: user.id, status })
-            if (status === 'going') {
-                await supabase.from('events').update({ rsvp_count: event.rsvp_count + 1 }).eq('id', eventId)
+            if (newCount !== prevCount) {
+                await supabase.from('events').update({ rsvp_count: newCount }).eq('id', eventId)
             }
+        } catch {
+            // Rollback on failure
+            setEvents(prev => prev.map(e => e.id === eventId
+                ? { ...e, rsvp_status: prevStatus, rsvp_count: prevCount } as Event
+                : e
+            ))
         }
-        fetchEvents()
     }
 
     const handleCreate = async () => {
@@ -81,7 +87,7 @@ export default function EventsPage() {
         setNewEvent({ title: '', description: '', location: '', start_date: '', end_date: '' })
         setShowCreate(false)
         setCreating(false)
-        fetchEvents()
+        refreshEvents(true)
     }
 
     const formatDate = (date: string) => {

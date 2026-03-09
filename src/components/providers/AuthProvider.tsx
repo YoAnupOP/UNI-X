@@ -1,10 +1,42 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, useCallback, useRef, ReactNode } from 'react'
-import { useRouter } from 'next/navigation'
+import { createContext, useContext, useEffect, useLayoutEffect, useState, useCallback, useRef, ReactNode } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { User } from '@supabase/supabase-js'
 import { Profile } from '@/lib/types'
+
+const PROFILE_CACHE_KEY = 'unx_cached_profile'
+const USER_CACHE_KEY = 'unx_cached_user'
+
+function getCachedProfile(): Profile | null {
+    if (typeof window === 'undefined') return null
+    try {
+        const raw = localStorage.getItem(PROFILE_CACHE_KEY)
+        return raw ? JSON.parse(raw) : null
+    } catch { return null }
+}
+
+function getCachedUser(): User | null {
+    if (typeof window === 'undefined') return null
+    try {
+        const raw = localStorage.getItem(USER_CACHE_KEY)
+        return raw ? JSON.parse(raw) : null
+    } catch { return null }
+}
+
+function persistProfile(profile: Profile | null) {
+    try {
+        if (profile) localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify(profile))
+        else localStorage.removeItem(PROFILE_CACHE_KEY)
+    } catch { /* ignore */ }
+}
+
+function persistUser(user: User | null) {
+    try {
+        if (user) localStorage.setItem(USER_CACHE_KEY, JSON.stringify(user))
+        else localStorage.removeItem(USER_CACHE_KEY)
+    } catch { /* ignore */ }
+}
 
 interface AuthContextType {
     user: User | null
@@ -25,12 +57,26 @@ const AuthContext = createContext<AuthContextType>({
 export const useAuth = () => useContext(AuthContext)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+    // Start with null to match server render — hydrate from localStorage after mount
     const [user, setUser] = useState<User | null>(null)
     const [profile, setProfile] = useState<Profile | null>(null)
     const [loading, setLoading] = useState(true)
     const supabase = createClient()
-    const router = useRouter()
     const profileFetchedRef = useRef<string | null>(null)
+    const cacheHydratedRef = useRef(false)
+
+    // Hydrate from localStorage before paint (avoids visible flash)
+    useLayoutEffect(() => {
+        const cachedUser = getCachedUser()
+        const cachedProfile = getCachedProfile()
+        if (cachedUser && cachedProfile) {
+            setUser(cachedUser)
+            setProfile(cachedProfile)
+            setLoading(false)
+            profileFetchedRef.current = cachedUser.id
+            cacheHydratedRef.current = true
+        }
+    }, [])
 
     const fetchProfile = useCallback(async (userId: string) => {
         // Skip if we already fetched for this user (avoids duplicate calls)
@@ -42,7 +88,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 .select('*')
                 .eq('id', userId)
                 .single()
-            if (data) setProfile(data as Profile)
+            if (data) {
+                setProfile(data as Profile)
+                persistProfile(data as Profile)
+            }
         } catch (e) {
             console.error('Profile fetch error:', e)
         }
@@ -65,8 +114,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 if (!mounted) return
                 const currentUser = session?.user ?? null
                 setUser(currentUser)
+                persistUser(currentUser)
+
                 if (currentUser) {
-                    await fetchProfile(currentUser.id)
+                    // If we already hydrated from cache for this user, revalidate in background
+                    if (cacheHydratedRef.current && profileFetchedRef.current === currentUser.id) {
+                        // Background revalidate — don't block rendering
+                        profileFetchedRef.current = null
+                        fetchProfile(currentUser.id)
+                    } else {
+                        await fetchProfile(currentUser.id)
+                    }
+                } else {
+                    // User is not authenticated — clear cached data
+                    setProfile(null)
+                    persistProfile(null)
+                    persistUser(null)
                 }
             } catch (e) {
                 console.error('Auth session error:', e)
@@ -86,6 +149,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
                 const currentUser = session?.user ?? null
                 setUser(currentUser)
+                persistUser(currentUser)
                 if (currentUser) {
                     // Force re-fetch profile on sign-in or token refresh
                     if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
@@ -94,6 +158,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     }
                 } else {
                     setProfile(null)
+                    persistProfile(null)
+                    persistUser(null)
                     profileFetchedRef.current = null
                 }
                 setLoading(false)
@@ -107,18 +173,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, [supabase, fetchProfile])
 
     const signOut = useCallback(async () => {
+        // Clear all client-side state immediately
+        setUser(null)
+        setProfile(null)
+        persistProfile(null)
+        persistUser(null)
+        profileFetchedRef.current = null
+        try { localStorage.clear() } catch { /* ignore */ }
+        try { sessionStorage.clear() } catch { /* ignore */ }
+
+        // Sign out server-side — this clears the httpOnly Supabase SSR cookies
+        // in the response so middleware won't see a valid session on redirect
         try {
-            await supabase.auth.signOut()
+            await fetch('/api/auth/signout', { method: 'POST' })
         } catch (e) {
             console.error('Sign out error:', e)
         }
-        setUser(null)
-        setProfile(null)
-        profileFetchedRef.current = null
-        // Clear the profile_completed cookie
-        document.cookie = 'profile_completed=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
-        router.push('/login')
-    }, [supabase, router])
+
+        // Hard redirect to login (cookies are already cleared server-side)
+        window.location.href = '/login'
+    }, [])
 
     return (
         <AuthContext.Provider value={{ user, profile, loading, signOut, refreshProfile }}>

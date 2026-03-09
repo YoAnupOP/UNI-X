@@ -71,10 +71,10 @@ export async function updateSession(request: NextRequest) {
                 .single()
 
             profileCompleted = profile?.profile_completed ?? null
-            // Cache the result in a cookie (expires in 5 minutes)
+            // Cache the result in a cookie (expires in 30 days)
             if (profile) {
                 supabaseResponse.cookies.set('profile_completed', String(profile.profile_completed), {
-                    maxAge: 300,
+                    maxAge: 2_592_000,
                     path: '/',
                     httpOnly: true,
                     sameSite: 'lax',

@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Announcement } from '@/lib/types'
 import { Megaphone, AlertTriangle, Info, AlertCircle } from 'lucide-react'
-import { getStaleCache, setCache, isCacheFresh } from '@/lib/cache'
+import { useCachedQuery } from '@/lib/useCachedQuery'
 
 const priorityConfig = {
     urgent: { color: '#F87171', bg: 'rgba(248,113,113,0.1)', icon: AlertTriangle, label: 'Urgent' },
@@ -14,26 +14,18 @@ const priorityConfig = {
 }
 
 export default function AnnouncementsPage() {
-    const [announcements, setAnnouncements] = useState<Announcement[]>(() => getStaleCache('announcements-data') || [])
-    const [loading, setLoading] = useState(() => !getStaleCache('announcements-data'))
     const supabase = createClient()
 
-    const fetch_ = useCallback(async (skipIfFresh = false) => {
-        if (skipIfFresh && isCacheFresh('announcements-data')) { setLoading(false); return }
-        try {
-            const { data } = await supabase.from('announcements').select('*, author:profiles(*)').eq('is_active', true).order('created_at', { ascending: false })
-            if (data) {
-                setAnnouncements(data as Announcement[])
-                setCache('announcements-data', data)
-            }
-        } catch (e) {
-            console.error('Failed to fetch announcements:', e)
-        } finally {
-            setLoading(false)
-        }
+    const fetchAnnouncementsData = useCallback(async () => {
+        const { data } = await supabase.from('announcements').select('*, author:profiles(*)').eq('is_active', true).order('created_at', { ascending: false })
+        return (data as Announcement[]) ?? null
     }, [])
 
-    useEffect(() => { fetch_(true) }, [fetch_])
+    const { data: announcements, isLoading: loading } = useCachedQuery(
+        'announcements-data',
+        fetchAnnouncementsData,
+        [] as Announcement[],
+    )
 
     return (
         <div style={{ maxWidth: '768px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '24px' }}>

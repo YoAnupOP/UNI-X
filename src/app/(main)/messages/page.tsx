@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/providers/AuthProvider'
 import { Conversation, Message, Profile } from '@/lib/types'
+import { useCachedQuery } from '@/lib/useCachedQuery'
 import { Send, Search, MessageCircle, Check, CheckCheck, ChevronLeft } from 'lucide-react'
 
 // ── Helpers ──
@@ -106,11 +107,9 @@ function MessagesContent() {
     const { user } = useAuth()
     const searchParams = useSearchParams()
     const supabase = createClient()
-    const [conversations, setConversations] = useState<Conversation[]>([])
     const [activeConvo, setActiveConvo] = useState<string | null>(null)
     const [messages, setMessages] = useState<Message[]>([])
     const [newMessage, setNewMessage] = useState('')
-    const [loading, setLoading] = useState(true)
     const [sending, setSending] = useState(false)
     const [searchQuery, setSearchQuery] = useState('')
     const [isOtherTyping, setIsOtherTyping] = useState(false)
@@ -135,6 +134,47 @@ function MessagesContent() {
             })
         }
     }, [])
+
+    // ── Fetch inbox data ──
+    const fetchConversationsData = useCallback(async (): Promise<Conversation[] | null> => {
+        if (!user) return null
+
+        const convoParam = searchParams.get('convo')
+
+        const response = await fetch('/api/dm/inbox', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ targetConvoId: convoParam })
+        }).then(r => r.json())
+
+        if (response.error) {
+            console.error('Failed to fetch inbox:', response.error)
+            return null
+        }
+
+        const { convos, participants, unreadMsgs } = response
+
+        const enriched = convos.map((c: any) => {
+            const convoParticipants = participants.filter((p: any) => p.conversation_id === c.id)
+            const other = convoParticipants.find((p: any) => p.user_id !== user.id) || convoParticipants[0]
+            const profile = Array.isArray(other?.profiles) ? other?.profiles[0] : other?.profiles
+            const unreadCount = unreadMsgs.filter((m: any) => m.conversation_id === c.id).length
+            return { ...c, participant: profile as Profile, unread_count: unreadCount }
+        })
+
+        enriched.sort((a: any, b: any) =>
+            new Date(b.last_message_at || 0).getTime() - new Date(a.last_message_at || 0).getTime()
+        )
+
+        return enriched
+    }, [user, searchParams])
+
+    const { data: conversations, setData: setConversations, isLoading: loading, refresh: refreshConversations } = useCachedQuery(
+        'dm-conversations',
+        fetchConversationsData,
+        [] as Conversation[],
+        { enabled: !!user }
+    )
 
     // ── Heartbeat: update last_seen_at every 15s ──
     useEffect(() => {
@@ -198,60 +238,23 @@ function MessagesContent() {
         scrollToBottom(true)
     }, [scrollToBottom])
 
-    // ── Fetch inbox via API ──
-    const fetchConversations = useCallback(async (silent = false) => {
-        if (!silent) setLoading(true)
-        if (!user) { if (!silent) setLoading(false); return }
-
-        const convoParam = searchParams.get('convo')
-
-        const response = await fetch('/api/dm/inbox', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ targetConvoId: convoParam })
-        }).then(r => r.json())
-
-        if (response.error) {
-            console.error('Failed to fetch inbox:', response.error)
-            if (!silent) setLoading(false)
-            return
-        }
-
-        const { convos, participants, unreadMsgs } = response
-
-        const enriched = convos.map((c: any) => {
-            const convoParticipants = participants.filter((p: any) => p.conversation_id === c.id)
-            const other = convoParticipants.find((p: any) => p.user_id !== user.id) || convoParticipants[0]
-            const profile = Array.isArray(other?.profiles) ? other?.profiles[0] : other?.profiles
-            const unreadCount = unreadMsgs.filter((m: any) => m.conversation_id === c.id).length
-            return { ...c, participant: profile as Profile, unread_count: unreadCount }
-        })
-
-        enriched.sort((a: any, b: any) =>
-            new Date(b.last_message_at || 0).getTime() - new Date(a.last_message_at || 0).getTime()
-        )
-
-        setConversations(enriched)
-
-        if (!initialConvoHandled.current) {
+    // Handle URL ?convo= parameter when conversations first load
+    useEffect(() => {
+        if (!initialConvoHandled.current && conversations.length > 0) {
             initialConvoHandled.current = true
-            if (convoParam && enriched.some((c: any) => c.id === convoParam)) {
+            const convoParam = searchParams.get('convo')
+            if (convoParam && conversations.some((c: Conversation) => c.id === convoParam)) {
                 fetchMessages(convoParam)
             }
         }
-
-        if (!silent) setLoading(false)
-    }, [user, searchParams, fetchMessages])
-
-    // Initial load
-    useEffect(() => { fetchConversations() }, [fetchConversations])
+    }, [conversations, searchParams, fetchMessages])
 
     // Poll inbox every 30s
     useEffect(() => {
         if (!user) return
-        const interval = setInterval(() => fetchConversations(true), 30000)
+        const interval = setInterval(() => refreshConversations(true), 30000)
         return () => clearInterval(interval)
-    }, [user, fetchConversations])
+    }, [user, refreshConversations])
 
     // ── Realtime: Broadcast channel per active conversation ──
     useEffect(() => {

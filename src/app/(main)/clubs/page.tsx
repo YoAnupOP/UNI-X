@@ -5,65 +5,69 @@ import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/providers/AuthProvider'
 import { Club } from '@/lib/types'
 import { Search, Plus, Users, Loader2 } from 'lucide-react'
-import { getStaleCache, setCache, isCacheFresh } from '@/lib/cache'
+import { setCache } from '@/lib/cache'
+import { useCachedQuery } from '@/lib/useCachedQuery'
 
 const categories = ['all', 'tech', 'arts', 'sports', 'academic', 'social', 'cultural'] as const
 
 export default function ClubsPage() {
     const { user, loading: authLoading } = useAuth()
-    const [clubs, setClubs] = useState<Club[]>(() => getStaleCache('clubs-data-all') || [])
-    const [loading, setLoading] = useState(() => !getStaleCache('clubs-data-all'))
+    const supabase = createClient()
     const [search, setSearch] = useState('')
     const [activeCategory, setActiveCategory] = useState<string>('all')
     const [showCreate, setShowCreate] = useState(false)
     const [newClub, setNewClub] = useState({ name: '', description: '', category: 'general' })
     const [creating, setCreating] = useState(false)
-    const supabase = createClient()
 
-    const fetchClubs = useCallback(async (skipIfFresh = false) => {
-        const cacheKey = `clubs-data-${activeCategory}`
-        if (skipIfFresh && isCacheFresh(cacheKey)) { setLoading(false); return }
-        try {
-            let query = supabase.from('clubs').select('*').eq('is_active', true).order('members_count', { ascending: false })
-            if (activeCategory !== 'all') query = query.eq('category', activeCategory)
-            const { data } = await query
+    const fetchClubsData = useCallback(async () => {
+        let query = supabase.from('clubs').select('*').eq('is_active', true).order('members_count', { ascending: false })
+        if (activeCategory !== 'all') query = query.eq('category', activeCategory)
+        const { data } = await query
 
-            if (data) {
-                if (user) {
-                    const { data: memberships } = await supabase.from('club_members').select('club_id').eq('user_id', user.id)
-                    const memberClubIds = new Set(memberships?.map(m => m.club_id))
-                    const result = data.map(c => ({ ...c, is_member: memberClubIds.has(c.id) })) as Club[]
-                    setClubs(result)
-                    setCache(cacheKey, result)
-                } else {
-                    setClubs(data as Club[])
-                    setCache(cacheKey, data)
-                }
-            }
-        } catch (e) {
-            console.error('Failed to fetch clubs:', e)
-        } finally {
-            setLoading(false)
+        if (data && user) {
+            const { data: memberships } = await supabase.from('club_members').select('club_id').eq('user_id', user.id)
+            const memberClubIds = new Set(memberships?.map(m => m.club_id))
+            return data.map(c => ({ ...c, is_member: memberClubIds.has(c.id) })) as Club[]
         }
+        return (data as Club[]) ?? null
     }, [activeCategory, user, supabase])
 
-    useEffect(() => {
-        if (!authLoading) fetchClubs(true)
-    }, [fetchClubs, authLoading])
+    const { data: clubs, setData: setClubs, isLoading: loading, refresh: refreshClubs } = useCachedQuery(
+        `clubs-data-${activeCategory}`,
+        fetchClubsData,
+        [] as Club[],
+        { enabled: !authLoading }
+    )
 
     const handleJoin = async (clubId: string) => {
         if (!user) return
         const club = clubs.find(c => c.id === clubId)
         if (!club) return
 
-        if (club.is_member) {
-            await supabase.from('club_members').delete().eq('club_id', clubId).eq('user_id', user.id)
-            await supabase.from('clubs').update({ members_count: club.members_count - 1 }).eq('id', clubId)
-            setClubs(clubs.map(c => c.id === clubId ? { ...c, is_member: false, members_count: c.members_count - 1 } : c))
-        } else {
-            await supabase.from('club_members').insert({ club_id: clubId, user_id: user.id })
-            await supabase.from('clubs').update({ members_count: club.members_count + 1 }).eq('id', clubId)
-            setClubs(clubs.map(c => c.id === clubId ? { ...c, is_member: true, members_count: c.members_count + 1 } : c))
+        const wasMember = club.is_member
+        const newMemberState = !wasMember
+        const countDelta = newMemberState ? 1 : -1
+
+        // Optimistic update — instant UI response
+        setClubs(prev => prev.map(c => c.id === clubId
+            ? { ...c, is_member: newMemberState, members_count: c.members_count + countDelta }
+            : c
+        ))
+
+        try {
+            if (wasMember) {
+                await supabase.from('club_members').delete().eq('club_id', clubId).eq('user_id', user.id)
+                await supabase.from('clubs').update({ members_count: club.members_count - 1 }).eq('id', clubId)
+            } else {
+                await supabase.from('club_members').insert({ club_id: clubId, user_id: user.id })
+                await supabase.from('clubs').update({ members_count: club.members_count + 1 }).eq('id', clubId)
+            }
+        } catch {
+            // Rollback on failure
+            setClubs(prev => prev.map(c => c.id === clubId
+                ? { ...c, is_member: wasMember, members_count: club.members_count }
+                : c
+            ))
         }
     }
 
@@ -80,12 +84,15 @@ export default function ClubsPage() {
         if (!error) {
             setNewClub({ name: '', description: '', category: 'general' })
             setShowCreate(false)
-            fetchClubs()
+            refreshClubs(true)
         }
         setCreating(false)
     }
 
-    const filtered = clubs.filter(c => c.name.toLowerCase().includes(search.toLowerCase()))
+    const filtered = clubs.filter(c => {
+        const q = search.toLowerCase()
+        return c.name.toLowerCase().includes(q) || (c.description || '').toLowerCase().includes(q)
+    })
 
     return (
         <div style={{ maxWidth: '896px', width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '24px', overflow: 'hidden' }}>

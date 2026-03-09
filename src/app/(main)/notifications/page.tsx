@@ -5,7 +5,8 @@ import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/providers/AuthProvider'
 import { Notification } from '@/lib/types'
 import { Bell, Heart, MessageCircle, UserPlus, Calendar, Megaphone, Users, Sparkles, Check } from 'lucide-react'
-import { getStaleCache, setCache, isCacheFresh } from '@/lib/cache'
+import { setCache } from '@/lib/cache'
+import { useCachedQuery } from '@/lib/useCachedQuery'
 
 const typeIcons: Record<string, typeof Heart> = {
     like: Heart, comment: MessageCircle, follow: UserPlus, match: Sparkles,
@@ -14,29 +15,20 @@ const typeIcons: Record<string, typeof Heart> = {
 
 export default function NotificationsPage() {
     const { user, loading: authLoading } = useAuth()
-    const [notifications, setNotifications] = useState<Notification[]>(() => getStaleCache('notifications-data') || [])
-    const [loading, setLoading] = useState(() => !getStaleCache('notifications-data'))
     const supabase = createClient()
 
-    const fetch_ = useCallback(async (skipIfFresh = false) => {
-        if (!user) { setLoading(false); return }
-        if (skipIfFresh && isCacheFresh('notifications-data')) { setLoading(false); return }
-        try {
-            const { data } = await supabase.from('notifications').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(50)
-            if (data) {
-                setNotifications(data as Notification[])
-                setCache('notifications-data', data)
-            }
-        } catch (e) {
-            console.error('Failed to fetch notifications:', e)
-        } finally {
-            setLoading(false)
-        }
+    const fetchNotificationsData = useCallback(async () => {
+        if (!user) return null
+        const { data } = await supabase.from('notifications').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(50)
+        return (data as Notification[]) ?? null
     }, [user])
 
-    useEffect(() => {
-        if (!authLoading) fetch_(true)
-    }, [fetch_, authLoading])
+    const { data: notifications, setData: setNotifications, isLoading: loading } = useCachedQuery(
+        'notifications-data',
+        fetchNotificationsData,
+        [] as Notification[],
+        { enabled: !authLoading }
+    )
 
     // Real-time notifications: new notifications appear instantly
     useEffect(() => {
@@ -78,8 +70,18 @@ export default function NotificationsPage() {
 
     const markAllRead = async () => {
         if (!user) return
-        await supabase.from('notifications').update({ is_read: true }).eq('user_id', user.id).eq('is_read', false)
+        const prev = notifications
+
+        // Optimistic update — instant UI response
         setNotifications(notifications.map(n => ({ ...n, is_read: true })))
+
+        try {
+            await supabase.from('notifications').update({ is_read: true }).eq('user_id', user.id).eq('is_read', false)
+        } catch {
+            // Rollback on failure + sync cache to prevent stale optimistic data
+            setNotifications(prev)
+            setCache('notifications-data', prev)
+        }
     }
 
     return (

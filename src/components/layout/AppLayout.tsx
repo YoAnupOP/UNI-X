@@ -45,7 +45,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         .desktop-sidebar { display: none; }
         .main-content { margin-left: 0; max-width: 100vw; }
         .mobile-nav { display: block; }
-        main { padding: 16px !important; }
+        main { padding: 16px !important; padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px) + 24px) !important; }
         
         @media (min-width: 768px) {
           .desktop-sidebar { display: block; }
