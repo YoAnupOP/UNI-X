@@ -1,7 +1,7 @@
-'use client'
+﻿'use client'
 
 import { useAuth } from '@/components/providers/AuthProvider'
-import Link from 'next/link'
+import PrefetchLink from '@/components/navigation/PrefetchLink'
 import { usePathname } from 'next/navigation'
 import {
     Home,
@@ -37,7 +37,7 @@ export default function Sidebar() {
     const pathname = usePathname()
     const [collapsed, setCollapsed] = useState(false)
 
-    const isActive = (href: string) => pathname === href
+    const isActive = (href: string) => pathname === href || pathname?.startsWith(href + '/')
 
     return (
         <aside style={{
@@ -54,7 +54,6 @@ export default function Sidebar() {
             zIndex: 40,
             overflow: 'hidden',
         }}>
-            {/* Logo */}
             <div style={{
                 padding: collapsed ? '20px 16px' : '20px 20px',
                 display: 'flex',
@@ -63,7 +62,7 @@ export default function Sidebar() {
                 borderBottom: '1px solid var(--color-border)',
                 minHeight: '64px',
             }}>
-                <Link href="/feed" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <PrefetchLink href="/feed" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <div style={{
                         width: '32px', height: '32px', borderRadius: '10px',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -76,7 +75,7 @@ export default function Sidebar() {
                             UNI-X
                         </span>
                     )}
-                </Link>
+                </PrefetchLink>
                 {!collapsed && (
                     <button onClick={() => setCollapsed(true)} style={{
                         padding: '4px', borderRadius: '6px', color: 'var(--color-text-muted)',
@@ -87,7 +86,6 @@ export default function Sidebar() {
                 )}
             </div>
 
-            {/* Collapse expand button */}
             {collapsed && (
                 <button onClick={() => setCollapsed(false)} style={{
                     padding: '8px', margin: '8px auto', borderRadius: '8px', color: 'var(--color-text-muted)',
@@ -97,14 +95,14 @@ export default function Sidebar() {
                 </button>
             )}
 
-            {/* Navigation */}
             <nav style={{ flex: 1, overflow: 'auto', padding: '12px 8px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                    {navItems.map(item => {
+                    {navItems.map((item) => {
                         const Icon = item.icon
                         const active = isActive(item.href)
+
                         return (
-                            <Link
+                            <PrefetchLink
                                 key={item.href}
                                 href={item.href}
                                 style={{
@@ -133,13 +131,12 @@ export default function Sidebar() {
                                         color: 'white',
                                     }}>AI</span>
                                 )}
-                            </Link>
+                            </PrefetchLink>
                         )
                     })}
 
-                    {/* Admin link (only for admin users) */}
                     {profile?.role === 'admin' && (
-                        <Link
+                        <PrefetchLink
                             href="/admin"
                             style={{
                                 display: 'flex', alignItems: 'center', gap: '12px',
@@ -152,14 +149,13 @@ export default function Sidebar() {
                         >
                             <Shield size={18} style={{ flexShrink: 0 }} />
                             {!collapsed && 'Admin'}
-                        </Link>
+                        </PrefetchLink>
                     )}
                 </div>
             </nav>
 
-            {/* Bottom Section */}
             <div style={{ padding: '8px', borderTop: '1px solid var(--color-border)' }}>
-                <Link href="/notifications" style={{
+                <PrefetchLink href="/notifications" style={{
                     display: 'flex', alignItems: 'center', gap: '12px',
                     padding: collapsed ? '10px 0' : '10px 12px', borderRadius: '10px',
                     fontSize: '14px', color: 'var(--color-text-secondary)',
@@ -167,9 +163,9 @@ export default function Sidebar() {
                 }}>
                     <Bell size={18} style={{ flexShrink: 0 }} />
                     {!collapsed && 'Notifications'}
-                </Link>
+                </PrefetchLink>
 
-                <Link href="/settings" style={{
+                <PrefetchLink href="/settings" style={{
                     display: 'flex', alignItems: 'center', gap: '12px',
                     padding: collapsed ? '10px 0' : '10px 12px', borderRadius: '10px',
                     fontSize: '14px', color: 'var(--color-text-secondary)',
@@ -177,9 +173,8 @@ export default function Sidebar() {
                 }}>
                     <Settings size={18} style={{ flexShrink: 0 }} />
                     {!collapsed && 'Settings'}
-                </Link>
+                </PrefetchLink>
 
-                {/* Profile */}
                 <div style={{
                     display: 'flex', alignItems: 'center', gap: '10px',
                     padding: collapsed ? '10px 0' : '10px 12px', marginTop: '4px',

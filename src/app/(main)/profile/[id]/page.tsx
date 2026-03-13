@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
@@ -26,7 +26,7 @@ export default function ProfilePage() {
     }
 
     const fetchProfileData = useCallback(async (): Promise<ProfileCacheData | null> => {
-        const queries: any[] = [
+        const queries: Array<PromiseLike<{ data: unknown; count?: number | null }>> = [
             supabase.from('profiles').select('*').eq('id', profileId).single(),
             supabase.from('posts').select('*, author:profiles(*)').eq('author_id', profileId).order('created_at', { ascending: false }).limit(20),
             supabase.from('followers').select('*', { count: 'exact', head: true }).eq('following_id', profileId),
@@ -61,8 +61,19 @@ export default function ProfilePage() {
     const followingCount = profileData.followingCount
     const isOwnProfile = user?.id === profileId
 
+    const toEditData = (value: Profile | null) => ({
+        full_name: value?.full_name || '',
+        display_name: value?.display_name || '',
+        bio: value?.bio || '',
+        university: value?.university || '',
+        department: value?.department || '',
+        year: value?.year || '',
+        skills: (value?.skills || []).join(', '),
+        interests: (value?.interests || []).join(', '),
+    })
+
     const [editing, setEditing] = useState(false)
-    const [editData, setEditData] = useState({ full_name: '', display_name: '', bio: '', university: '', department: '', year: '', skills: '', interests: '' })
+    const [editData, setEditData] = useState(() => toEditData(profile))
     const [saving, setSaving] = useState(false)
     const [copied, setCopied] = useState(false)
     const [startingDM, setStartingDM] = useState(false)
@@ -70,27 +81,11 @@ export default function ProfilePage() {
     const [followersList, setFollowersList] = useState<Profile[]>([])
     const [loadingList, setLoadingList] = useState(false)
 
-    // Sync edit form data when profile loads (skip if user is actively editing)
-    useEffect(() => {
-        if (profileData.profile && !editing) {
-            setEditData({
-                full_name: profileData.profile.full_name || '',
-                display_name: profileData.profile.display_name || '',
-                bio: profileData.profile.bio || '',
-                university: profileData.profile.university || '',
-                department: profileData.profile.department || '',
-                year: profileData.profile.year || '',
-                skills: (profileData.profile.skills || []).join(', '),
-                interests: (profileData.profile.interests || []).join(', '),
-            })
-        }
-    }, [profileData.profile, editing])
-
     const handleFollow = async () => {
         if (!user) return
         const wasFollowing = profileData.isFollowing
 
-        // Optimistic update — instant UI response
+        // Optimistic update â€” instant UI response
         setProfileData(prev => ({
             ...prev,
             isFollowing: !wasFollowing,
@@ -223,7 +218,7 @@ export default function ProfilePage() {
                                             display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                                             width: '20px', height: '20px', borderRadius: '50%', backgroundColor: 'var(--color-primary)',
                                             color: 'white', fontSize: '12px'
-                                        }} title="Verified">✓</span>
+                                        }} title="Verified">âœ“</span>
                                     )}
                                 </h1>
                                 {profile.username && (
@@ -236,7 +231,7 @@ export default function ProfilePage() {
                             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                                 {isOwnProfile ? (
                                     <button
-                                        onClick={() => setEditing(!editing)}
+                                        onClick={() => { setEditData(toEditData(profile)); setEditing((value) => !value) }}
                                         className="hover-lift"
                                         style={{
                                             display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '16px',
@@ -573,3 +568,6 @@ export default function ProfilePage() {
         </div>
     )
 }
+
+
+

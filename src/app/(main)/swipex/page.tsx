@@ -1,10 +1,10 @@
-'use client'
+﻿'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/providers/AuthProvider'
 import { Profile } from '@/lib/types'
-import { Heart, X, Sparkles, MessageCircle, Loader2, RefreshCw, GraduationCap, MapPin, ArrowLeft, ArrowRight } from 'lucide-react'
+import { Heart, X, Sparkles, MessageCircle, Loader2, RefreshCw, GraduationCap, MapPin } from 'lucide-react'
 import Link from 'next/link'
 import { useCachedQuery } from '@/lib/useCachedQuery'
 
@@ -36,25 +36,14 @@ export default function SwipeXPage() {
         return (data as Profile[]) || null
     }, [user, supabase])
 
-    const { data: candidates, setData: setCandidates, isLoading: loading, refresh: refreshCandidates } = useCachedQuery(
+    const { data: candidates, isLoading: loading, refresh: refreshCandidates } = useCachedQuery(
         'swipex-candidates',
         fetchCandidatesData,
         [] as Profile[],
         { enabled: !authLoading }
     )
 
-    // Keyboard shortcuts
-    useEffect(() => {
-        const handleKey = (e: KeyboardEvent) => {
-            if (swiping || !candidates[currentIndex]) return
-            if (e.key === 'ArrowLeft') handleSwipe('pass')
-            if (e.key === 'ArrowRight') handleSwipe('like')
-        }
-        window.addEventListener('keydown', handleKey)
-        return () => window.removeEventListener('keydown', handleKey)
-    })
-
-    const handleSwipe = async (action: 'like' | 'pass') => {
+    async function handleSwipe(action: 'like' | 'pass') {
         if (!user || currentIndex >= candidates.length || swiping) return
         const target = candidates[currentIndex]
         setSwiping(true)
@@ -115,6 +104,16 @@ export default function SwipeXPage() {
         }
     }
 
+    const matchParticles = useMemo(() => Array.from({ length: 20 }, (_, i) => ({
+        left: `${Math.floor((i * 17) % 100)}%`,
+        top: `${Math.floor((i * 29) % 100)}%`,
+        width: `${6 + (i % 4) * 2}px`,
+        height: `${6 + (i % 4) * 2}px`,
+        background: i % 3 === 0 ? 'var(--color-primary)' : i % 3 === 1 ? '#34D399' : 'var(--color-accent)',
+        opacity: 0.45 + (i % 4) * 0.1,
+        animation: `matchFloat ${2 + (i % 3)}s ease-in-out infinite`,
+        animationDelay: `${(i % 5) * 0.3}s`,
+    })), [])
     const current = candidates[currentIndex]
     const next = candidates[currentIndex + 1]
     const rotation = isDragging ? dragOffset.x * 0.08 : 0
@@ -142,7 +141,7 @@ export default function SwipeXPage() {
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ fontSize: '12px', color: 'var(--color-text-muted)', padding: '4px 10px', borderRadius: '8px', backgroundColor: 'var(--color-bg-elevated)' }}>
-                        ← → to swipe
+                        â† â†’ to swipe
                     </span>
                 </div>
             </div>
@@ -400,21 +399,20 @@ export default function SwipeXPage() {
                     backgroundColor: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(12px)', padding: '20px',
                 }}>
                     {/* Floating particles */}
-                    {Array.from({ length: 20 }).map((_, i) => (
+                    {matchParticles.map((particle, i) => (
                         <div key={i} className="match-particle" style={{
                             position: 'absolute',
-                            left: `${Math.random() * 100}%`,
-                            top: `${Math.random() * 100}%`,
-                            width: `${4 + Math.random() * 8}px`,
-                            height: `${4 + Math.random() * 8}px`,
+                            left: particle.left,
+                            top: particle.top,
+                            width: particle.width,
+                            height: particle.height,
                             borderRadius: '50%',
-                            background: i % 3 === 0 ? 'var(--color-primary)' : i % 3 === 1 ? '#34D399' : 'var(--color-accent)',
-                            opacity: 0.4 + Math.random() * 0.4,
-                            animation: `matchFloat ${2 + Math.random() * 3}s ease-in-out infinite`,
-                            animationDelay: `${Math.random() * 2}s`,
+                            background: particle.background,
+                            opacity: particle.opacity,
+                            animation: particle.animation,
+                            animationDelay: particle.animationDelay,
                         }} />
                     ))}
-
                     <div className="animate-scale-in" style={{
                         textAlign: 'center', maxWidth: '380px', width: '100%', position: 'relative', zIndex: 10,
                     }}>
@@ -470,7 +468,7 @@ export default function SwipeXPage() {
                         </p>
                         {showMatch.username && (
                             <p style={{ fontSize: '14px', color: 'var(--color-primary)', margin: '0 0 28px 0', fontWeight: 600 }}>
-                                @{myProfile?.username} ↔ @{showMatch.username}
+                                @{myProfile?.username} â†” @{showMatch.username}
                             </p>
                         )}
 
@@ -517,3 +515,10 @@ export default function SwipeXPage() {
         </div>
     )
 }
+
+
+
+
+
+
+

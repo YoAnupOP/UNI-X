@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useLayoutEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -30,7 +30,7 @@ interface ModerationItem {
     post?: { content?: string }
 }
 
-// ── API helpers ──────────────────────────────────────────
+// â”€â”€ API helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function api<T = unknown>(url: string, opts?: RequestInit): Promise<{ data?: T; error?: string }> {
     try {
         const res = await fetch(url, opts)
@@ -47,10 +47,10 @@ export default function AdminPage() {
     const router = useRouter()
     const supabase = createClient()
 
-    // ── Tab state ──
+    // â”€â”€ Tab state â”€â”€
     const [activeTab, setActiveTab] = useState<Tab>('overview')
 
-    // ── Overview ──
+    // â”€â”€ Overview â”€â”€
     const [stats, setStats] = useState({ users: 0, posts: 0, clubs: 0, events: 0 })
     const [recentUsers, setRecentUsers] = useState<Profile[]>([])
     const [recentPosts, setRecentPosts] = useState<Post[]>([])
@@ -62,7 +62,7 @@ export default function AdminPage() {
         if (cached) { setStats(cached); setLoading(false) }
     }, [])
 
-    // ── Users ──
+    // â”€â”€ Users â”€â”€
     const [users, setUsers] = useState<Profile[]>([])
     const [usersTotal, setUsersTotal] = useState(0)
     const [usersPage, setUsersPage] = useState(1)
@@ -70,7 +70,7 @@ export default function AdminPage() {
     const [usersRoleFilter, setUsersRoleFilter] = useState('')
     const [usersLoading, setUsersLoading] = useState(false)
 
-    // ── Clubs ──
+    // â”€â”€ Clubs â”€â”€
     const [clubs, setClubs] = useState<Club[]>([])
     const [clubsTotal, setClubsTotal] = useState(0)
     const [clubsPage, setClubsPage] = useState(1)
@@ -78,7 +78,7 @@ export default function AdminPage() {
     const [clubsCategoryFilter, setClubsCategoryFilter] = useState('')
     const [clubsLoading, setClubsLoading] = useState(false)
 
-    // ── Events ──
+    // â”€â”€ Events â”€â”€
     const [events, setEvents] = useState<Event[]>([])
     const [eventsTotal, setEventsTotal] = useState(0)
     const [eventsPage, setEventsPage] = useState(1)
@@ -88,7 +88,7 @@ export default function AdminPage() {
     const [showCreateEvent, setShowCreateEvent] = useState(false)
     const [newEvent, setNewEvent] = useState({ title: '', description: '', location: '', start_date: '', end_date: '' })
 
-    // ── Announcements ──
+    // â”€â”€ Announcements â”€â”€
     const [announcements, setAnnouncements] = useState<Announcement[]>([])
     const [announcementsTotal, setAnnouncementsTotal] = useState(0)
     const [announcementsPage, setAnnouncementsPage] = useState(1)
@@ -97,7 +97,7 @@ export default function AdminPage() {
     const [newAnnouncement, setNewAnnouncement] = useState({ title: '', content: '', priority: 'normal' })
     const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null)
 
-    // ── Moderation ──
+    // â”€â”€ Moderation â”€â”€
     const [modSubTab, setModSubTab] = useState<ModerationSubTab>('post')
     const [modItems, setModItems] = useState<ModerationItem[]>([])
     const [modTotal, setModTotal] = useState(0)
@@ -105,18 +105,18 @@ export default function AdminPage() {
     const [modSearch, setModSearch] = useState('')
     const [modLoading, setModLoading] = useState(false)
 
-    // ── Shared UI state ──
+    // â”€â”€ Shared UI state â”€â”€
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
     const [confirmAction, setConfirmAction] = useState<{ title: string; message: string; onConfirm: () => Promise<void> } | null>(null)
     const [confirmLoading, setConfirmLoading] = useState(false)
     const [actionLoading, setActionLoading] = useState<string | null>(null)
 
-    // ── Auth guard ──
+    // â”€â”€ Auth guard â”€â”€
     useEffect(() => {
         if (profile && profile.role !== 'admin') router.push('/feed')
     }, [profile, router])
 
-    // ── Overview data ──
+    // â”€â”€ Overview data â”€â”€
     const fetchOverview = useCallback(async () => {
         try {
             const [usersRes, postsRes, clubsRes, eventsRes] = await Promise.all([
@@ -147,7 +147,7 @@ export default function AdminPage() {
 
     useEffect(() => { fetchOverview() }, [fetchOverview])
 
-    // ── Users data ──
+    // â”€â”€ Users data â”€â”€
     const fetchUsers = useCallback(async () => {
         setUsersLoading(true)
         const params = new URLSearchParams({ page: String(usersPage), limit: '15' })
@@ -184,7 +184,7 @@ export default function AdminPage() {
         })
     }
 
-    // ── Clubs data ──
+    // â”€â”€ Clubs data â”€â”€
     const fetchClubs = useCallback(async () => {
         setClubsLoading(true)
         const params = new URLSearchParams({ page: String(clubsPage), limit: '15' })
@@ -221,7 +221,7 @@ export default function AdminPage() {
         })
     }
 
-    // ── Events data ──
+    // â”€â”€ Events data â”€â”€
     const fetchEvents = useCallback(async () => {
         setEventsLoading(true)
         const params = new URLSearchParams({ page: String(eventsPage), limit: '15', filter: eventsFilter })
@@ -275,7 +275,7 @@ export default function AdminPage() {
         })
     }
 
-    // ── Announcements data ──
+    // â”€â”€ Announcements data â”€â”€
     const fetchAnnouncements = useCallback(async () => {
         setAnnouncementsLoading(true)
         const params = new URLSearchParams({ page: String(announcementsPage), limit: '15' })
@@ -346,14 +346,22 @@ export default function AdminPage() {
         })
     }
 
-    // ── Moderation data ──
-    const fetchModeration = useCallback(async () => {
-        setModLoading(true)
-        const params = new URLSearchParams({ type: modSubTab, page: String(modPage), limit: '15' })
-        if (modSearch) params.set('q', modSearch)
-        const { data } = await api<{ data: ModerationItem[]; total: number }>(`/api/admin/moderation?${params}`)
-        if (data) { setModItems(data.data); setModTotal(data.total) }
-        setModLoading(false)
+    // â”€â”€ Moderation data â”€â”€
+    const fetchModeration = useCallback(async (options?: { background?: boolean }) => {
+        if (!options?.background) {
+            setModLoading(true)
+        }
+
+        try {
+            const params = new URLSearchParams({ type: modSubTab, page: String(modPage), limit: '15' })
+            if (modSearch) params.set('q', modSearch)
+            const { data } = await api<{ data: ModerationItem[]; total: number }>(`/api/admin/moderation?${params}`)
+            if (data) { setModItems(data.data); setModTotal(data.total) }
+        } finally {
+            if (!options?.background) {
+                setModLoading(false)
+            }
+        }
     }, [modSubTab, modPage, modSearch])
 
     useEffect(() => { if (activeTab === 'moderation') fetchModeration() }, [fetchModeration, activeTab])
@@ -364,20 +372,47 @@ export default function AdminPage() {
             title: `Delete ${labels[type]}`,
             message: `This will permanently remove this ${labels[type].toLowerCase()}. This cannot be undone.`,
             onConfirm: async () => {
-                const { error } = await api(`/api/admin/moderation?type=${type}&id=${id}`, { method: 'DELETE' })
-                if (error) setToast({ message: error, type: 'error' })
-                else { setToast({ message: `${labels[type]} deleted`, type: 'success' }); fetchModeration() }
+                const previousItems = modItems
+                const previousTotal = modTotal
+                const previousStats = stats
+                const previousRecentPosts = recentPosts
+
+                setModItems((current) => current.filter((item) => item.id !== id))
+                setModTotal((current) => Math.max(0, current - 1))
+
+                if (type === 'post') {
+                    setStats((current) => ({ ...current, posts: Math.max(0, current.posts - 1) }))
+                    setRecentPosts((current) => current.filter((post) => post.id !== id))
+                }
+
+                void api(`/api/admin/moderation?type=${type}&id=${id}`, { method: 'DELETE' }).then(({ error }) => {
+                    if (error) {
+                        setModItems(previousItems)
+                        setModTotal(previousTotal)
+                        setStats(previousStats)
+                        setRecentPosts(previousRecentPosts)
+                        setToast({ message: error, type: 'error' })
+                        void fetchModeration({ background: true })
+                        return
+                    }
+
+                    setToast({ message: `${labels[type]} deleted`, type: 'success' })
+                    void fetchModeration({ background: true })
+
+                    if (type === 'post') {
+                        void fetchOverview()
+                    }
+                })
             },
         })
     }
-
-    // ── Reset page on filter change ──
+    // â”€â”€ Reset page on filter change â”€â”€
     useEffect(() => { setUsersPage(1) }, [usersSearch, usersRoleFilter])
     useEffect(() => { setClubsPage(1) }, [clubsSearch, clubsCategoryFilter])
     useEffect(() => { setEventsPage(1) }, [eventsSearch, eventsFilter])
     useEffect(() => { setModPage(1) }, [modSearch, modSubTab])
 
-    // ── Tab config ──
+    // â”€â”€ Tab config â”€â”€
     const tabs: { id: Tab; label: string; icon: typeof Shield }[] = [
         { id: 'overview', label: 'Overview', icon: BarChart3 },
         { id: 'users', label: 'Users', icon: Users },
@@ -455,7 +490,7 @@ export default function AdminPage() {
                 <div className="flex justify-center py-20"><Loader2 size={32} className="animate-spin" style={{ color: 'var(--color-primary)' }} /></div>
             ) : (
                 <>
-                    {/* ════════════════ OVERVIEW ════════════════ */}
+                    {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• OVERVIEW â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
                     {activeTab === 'overview' && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
                             {/* Stat Cards */}
@@ -637,7 +672,7 @@ export default function AdminPage() {
                         </div>
                     )}
 
-                    {/* ════════════════ USERS ════════════════ */}
+                    {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• USERS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
                     {activeTab === 'users' && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '12px' }}>
@@ -749,7 +784,7 @@ export default function AdminPage() {
                         </div>
                     )}
 
-                    {/* ════════════════ CLUBS ════════════════ */}
+                    {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• CLUBS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
                     {activeTab === 'clubs' && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '12px' }}>
@@ -796,8 +831,8 @@ export default function AdminPage() {
                                                             <StatusBadge value={c.is_active ? 'active' : 'inactive'} />
                                                         </div>
                                                         <p style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
-                                                            {c.members_count} members • {c.category}
-                                                            {c.admin && ` • Admin: ${(c.admin as Profile).full_name || (c.admin as Profile).username}`}
+                                                            {c.members_count} members â€¢ {c.category}
+                                                            {c.admin && ` â€¢ Admin: ${(c.admin as Profile).full_name || (c.admin as Profile).username}`}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -827,7 +862,7 @@ export default function AdminPage() {
                         </div>
                     )}
 
-                    {/* ════════════════ EVENTS ════════════════ */}
+                    {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• EVENTS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
                     {activeTab === 'events' && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '12px' }}>
@@ -934,7 +969,7 @@ export default function AdminPage() {
                         </div>
                     )}
 
-                    {/* ════════════════ ANNOUNCEMENTS ════════════════ */}
+                    {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• ANNOUNCEMENTS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
                     {activeTab === 'announcements' && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '12px' }}>
@@ -1074,7 +1109,7 @@ export default function AdminPage() {
                         </div>
                     )}
 
-                    {/* ════════════════ MODERATION ════════════════ */}
+                    {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• MODERATION â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
                     {activeTab === 'moderation' && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '12px' }}>
@@ -1170,7 +1205,7 @@ export default function AdminPage() {
                 </>
             )}
 
-            {/* ── Confirm Modal ── */}
+            {/* â”€â”€ Confirm Modal â”€â”€ */}
             <ConfirmModal
                 open={!!confirmAction}
                 title={confirmAction?.title}
@@ -1187,7 +1222,7 @@ export default function AdminPage() {
                 }}
             />
 
-            {/* ── Toast ── */}
+            {/* â”€â”€ Toast â”€â”€ */}
             {toast && <AdminToast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
             <style>{`
@@ -1240,3 +1275,4 @@ export default function AdminPage() {
         </div>
     )
 }
+

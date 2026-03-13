@@ -1,6 +1,6 @@
-'use client'
+﻿'use client'
 
-import Link from 'next/link'
+import PrefetchLink from '@/components/navigation/PrefetchLink'
 import { usePathname } from 'next/navigation'
 import { Home, Users, Repeat2, MessageCircle, Menu, X, Settings, LogOut, User, Calendar, Megaphone, Image as ImageIcon, Sparkles, Bell, Shield } from 'lucide-react'
 import { useAuth } from '@/components/providers/AuthProvider'
@@ -12,19 +12,15 @@ export default function MobileNav() {
     const [menuOpen, setMenuOpen] = useState(false)
     const menuRef = useRef<HTMLDivElement>(null)
 
-    // Close menu on route change
-    useEffect(() => {
-        setMenuOpen(false)
-    }, [pathname])
-
-    // Close menu on outside click
     useEffect(() => {
         if (!menuOpen) return
-        const handleClick = (e: MouseEvent) => {
-            if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+
+        const handleClick = (event: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
                 setMenuOpen(false)
             }
         }
+
         document.addEventListener('mousedown', handleClick)
         return () => document.removeEventListener('mousedown', handleClick)
     }, [menuOpen])
@@ -47,9 +43,10 @@ export default function MobileNav() {
         ...(profile?.role === 'admin' ? [{ href: '/admin', icon: Shield, label: 'Admin' }] : []),
     ]
 
+    const closeMenu = () => setMenuOpen(false)
+
     return (
         <>
-            {/* Overlay */}
             {menuOpen && (
                 <div
                     style={{
@@ -58,11 +55,10 @@ export default function MobileNav() {
                         backgroundColor: 'rgba(0, 0, 0, 0.5)',
                         zIndex: 39,
                     }}
-                    onClick={() => setMenuOpen(false)}
+                    onClick={closeMenu}
                 />
             )}
 
-            {/* Slide-up Menu */}
             <div
                 ref={menuRef}
                 style={{
@@ -81,7 +77,6 @@ export default function MobileNav() {
                     overflowY: 'auto',
                 }}
             >
-                {/* Profile header */}
                 {profile && (
                     <div style={{
                         display: 'flex', alignItems: 'center', gap: '12px',
@@ -109,15 +104,16 @@ export default function MobileNav() {
                     </div>
                 )}
 
-                {/* Menu links */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                    {menuLinks.map(item => {
+                    {menuLinks.map((item) => {
                         const Icon = item.icon
                         const active = pathname === item.href || pathname?.startsWith(item.href + '/')
+
                         return (
-                            <Link
+                            <PrefetchLink
                                 key={item.href}
                                 href={item.href}
+                                onClick={closeMenu}
                                 style={{
                                     display: 'flex', alignItems: 'center', gap: '12px',
                                     padding: '12px', borderRadius: '12px',
@@ -128,12 +124,11 @@ export default function MobileNav() {
                             >
                                 <Icon size={20} />
                                 {item.label}
-                            </Link>
+                            </PrefetchLink>
                         )
                     })}
                 </div>
 
-                {/* Sign Out */}
                 <div style={{ borderTop: '1px solid var(--color-border)', marginTop: '8px', paddingTop: '8px' }}>
                     <button
                         onClick={signOut}
@@ -152,7 +147,6 @@ export default function MobileNav() {
                 </div>
             </div>
 
-            {/* Bottom Navigation Bar */}
             <nav style={{
                 position: 'fixed',
                 bottom: 0,
@@ -169,13 +163,13 @@ export default function MobileNav() {
                 borderTop: '1px solid var(--color-border)',
                 paddingBottom: 'env(safe-area-inset-bottom, 0px)',
             }}>
-                {navItems.map(item => {
+                {navItems.map((item) => {
                     const Icon = item.icon
                     const active = pathname === item.href || pathname?.startsWith(item.href + '/')
 
                     if (item.primary) {
                         return (
-                            <Link key={item.label} href={item.href} style={{
+                            <PrefetchLink key={item.label} href={item.href} style={{
                                 width: '48px',
                                 height: '48px',
                                 borderRadius: '14px',
@@ -188,12 +182,12 @@ export default function MobileNav() {
                                 transform: 'translateY(-8px)',
                             }}>
                                 <Icon size={22} />
-                            </Link>
+                            </PrefetchLink>
                         )
                     }
 
                     return (
-                        <Link key={item.label} href={item.href} style={{
+                        <PrefetchLink key={item.label} href={item.href} style={{
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
@@ -206,13 +200,12 @@ export default function MobileNav() {
                         }}>
                             <Icon size={20} />
                             <span>{item.label}</span>
-                        </Link>
+                        </PrefetchLink>
                     )
                 })}
 
-                {/* More / Menu button */}
                 <button
-                    onClick={() => setMenuOpen(prev => !prev)}
+                    onClick={() => setMenuOpen((current) => !current)}
                     style={{
                         display: 'flex',
                         flexDirection: 'column',

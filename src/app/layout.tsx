@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import "./globals.css";
-import { AuthProvider } from "@/components/providers/AuthProvider";
+import { AppProviders } from "@/components/providers/AppProviders";
+import { getViewer } from "@/lib/server/viewer";
 
 export const metadata: Metadata = {
   title: "UNI-X | University Xplore",
@@ -14,18 +15,21 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const viewer = await getViewer();
+
   return (
     <html lang="en" className="dark">
       <body className="antialiased">
-        <AuthProvider>
+        <AppProviders initialUser={viewer.user} initialProfile={viewer.profile}>
           {children}
-        </AuthProvider>
+        </AppProviders>
       </body>
     </html>
   );
 }
+
