@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidateTag } from 'next/cache'
 import { createClient as createServerClient } from '@supabase/supabase-js'
 import { createServerClient as createSupabaseSSR } from '@supabase/ssr'
+import { CACHE_TAGS } from '@/lib/server/cache-tags'
 
 export async function POST(request: NextRequest) {
     try {
@@ -51,6 +53,7 @@ export async function POST(request: NextRequest) {
                 .in('conversation_id', convoIds)
 
             if (existing?.length) {
+                revalidateTag(CACHE_TAGS.dmInbox, 'max')
                 return NextResponse.json({ conversationId: existing[0].conversation_id })
             }
         }
@@ -72,6 +75,7 @@ export async function POST(request: NextRequest) {
             { conversation_id: convo.id, user_id: targetUserId },
         ])
 
+        revalidateTag(CACHE_TAGS.dmInbox, 'max')
         return NextResponse.json({ conversationId: convo.id })
     } catch (error) {
         console.error('Start conversation error:', error)

@@ -20,6 +20,7 @@ export default async function MessagesPage({ searchParams }: MessagesPageProps) 
             initialConversationId={initialConversationId}
             initialMessages={initialThread.messages}
             initialIsOtherTyping={initialThread.isOtherTyping}
+            requestedConversationId={requestedConversationId}
         />
     )
 }

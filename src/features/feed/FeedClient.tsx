@@ -300,29 +300,69 @@ export default function FeedClient({ initialPosts, initialSuggestions, renderedA
                 </section>
 
                 <aside style={{ display: suggestions.length ? 'block' : 'none' }} className="feed-sidebar">
-                    <div style={{ background: 'var(--color-bg-card)', border: '1px solid var(--color-border)', borderRadius: '20px', padding: '18px', position: 'sticky', top: '96px' }}>
-                        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 700, marginBottom: '14px' }}>Suggested for you</h2>
-                        <div style={{ display: 'grid', gap: '12px' }}>
-                            {suggestions.map((suggestion) => (
-                                <div key={suggestion.id} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <Link href={`/profile/${suggestion.id}`} style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, color: 'inherit', textDecoration: 'none', flex: 1 }}>
-                                        <div style={{
-                                            width: '38px', height: '38px', borderRadius: '12px', flexShrink: 0,
-                                            background: suggestion.avatar_url ? `url(${suggestion.avatar_url}) center/cover` : 'linear-gradient(135deg, var(--color-primary), var(--color-accent))',
-                                            display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700,
-                                        }}>
-                                            {!suggestion.avatar_url && (suggestion.full_name?.[0] || 'U')}
-                                        </div>
-                                        <div style={{ minWidth: 0 }}>
-                                            <div style={{ fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{suggestion.full_name || 'Student'}</div>
-                                            <div style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>@{suggestion.username || 'student'}</div>
-                                        </div>
-                                    </Link>
-                                    <button onClick={() => followMutation.mutate(suggestion.id)} style={{ border: 'none', background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))', color: 'white', borderRadius: '10px', padding: '8px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                        <UserPlus size={14} /> Follow
-                                    </button>
-                                </div>
-                            ))}
+                    <div style={{ background: 'var(--color-bg-card)', border: '1px solid var(--color-border)', borderRadius: '24px', padding: '18px', position: 'sticky', top: '96px' }}>
+                        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 700, marginBottom: '6px' }}>Suggested for you</h2>
+                        <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginBottom: '14px' }}>People from UNI-X you may want to connect with.</p>
+                        <div style={{ display: 'grid', gap: '10px' }}>
+                            {suggestions.map((suggestion) => {
+                                const isFollowPending = followMutation.isPending && followMutation.variables === suggestion.id
+
+                                return (
+                                    <div
+                                        key={suggestion.id}
+                                        className="feed-suggestion-row"
+                                        style={{
+                                            display: 'grid',
+                                            gridTemplateColumns: 'minmax(0, 1fr) auto',
+                                            alignItems: 'center',
+                                            gap: '12px',
+                                            padding: '10px',
+                                            borderRadius: '16px',
+                                            border: '1px solid rgba(255,255,255,0.06)',
+                                            background: 'rgba(255,255,255,0.02)',
+                                        }}
+                                    >
+                                        <Link href={`/profile/${suggestion.id}`} style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, color: 'inherit', textDecoration: 'none' }}>
+                                            <div style={{
+                                                width: '42px', height: '42px', borderRadius: '14px', flexShrink: 0,
+                                                background: suggestion.avatar_url ? `url(${suggestion.avatar_url}) center/cover` : 'linear-gradient(135deg, var(--color-primary), var(--color-accent))',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700,
+                                                boxShadow: '0 10px 24px rgba(0, 0, 0, 0.18)',
+                                            }}>
+                                                {!suggestion.avatar_url && (suggestion.full_name?.[0] || 'U')}
+                                            </div>
+                                            <div style={{ minWidth: 0 }}>
+                                                <div style={{ fontSize: '14px', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{suggestion.full_name || 'Student'}</div>
+                                                <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>@{suggestion.username || 'student'}</div>
+                                            </div>
+                                        </Link>
+                                        <button
+                                            onClick={() => followMutation.mutate(suggestion.id)}
+                                            disabled={isFollowPending}
+                                            style={{
+                                                minWidth: '92px',
+                                                border: 'none',
+                                                background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                                                color: 'white',
+                                                borderRadius: '12px',
+                                                padding: '9px 12px',
+                                                cursor: isFollowPending ? 'default' : 'pointer',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                gap: '6px',
+                                                fontSize: '13px',
+                                                fontWeight: 700,
+                                                boxShadow: '0 12px 24px rgba(72, 187, 255, 0.18)',
+                                                opacity: isFollowPending ? 0.75 : 1,
+                                            }}
+                                        >
+                                            {isFollowPending ? <Loader2 size={14} className="animate-spin" /> : <UserPlus size={14} />}
+                                            {isFollowPending ? 'Adding' : 'Follow'}
+                                        </button>
+                                    </div>
+                                )
+                            })}
                         </div>
                     </div>
                 </aside>
@@ -331,7 +371,15 @@ export default function FeedClient({ initialPosts, initialSuggestions, renderedA
             <style>{`
                 .feed-layout { grid-template-columns: 1fr; }
                 @media (min-width: 980px) {
-                    .feed-layout { grid-template-columns: minmax(0, 1fr) 280px; align-items: start; }
+                    .feed-layout { grid-template-columns: minmax(0, 1fr) 320px; align-items: start; }
+                }
+                .feed-suggestion-row {
+                    transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+                }
+                .feed-suggestion-row:hover {
+                    transform: translateY(-1px);
+                    border-color: rgba(255,255,255,0.12);
+                    background: rgba(255,255,255,0.035);
                 }
             `}</style>
         </div>
