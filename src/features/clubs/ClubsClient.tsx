@@ -65,7 +65,7 @@ export default function ClubsClient({ initialClubs }: { initialClubs: Club[] }) 
                     <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 700, margin: 0 }}>Clubs</h1>
                     <p style={{ fontSize: '14px', color: 'var(--color-text-muted)', margin: '4px 0 0 0' }}>Loaded once, filtered locally, and cached for the whole session.</p>
                 </div>
-                <button onClick={() => setShowCreate((prev) => !prev)} style={{ border: 'none', borderRadius: '14px', padding: '10px 16px', background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <button onClick={() => setShowCreate((prev) => !prev)} style={{ border: 'none', borderRadius: '14px', padding: '10px 16px', background: 'var(--color-primary)', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <Plus size={16} /> Create club
                 </button>
             </div>
@@ -79,7 +79,7 @@ export default function ClubsClient({ initialClubs }: { initialClubs: Club[] }) 
                     </select>
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
                         <button onClick={() => setShowCreate(false)} style={{ border: 'none', background: 'transparent', color: 'var(--color-text-muted)', padding: '10px 12px', cursor: 'pointer' }}>Cancel</button>
-                        <button onClick={() => createMutation.mutate()} disabled={!form.name.trim() || createMutation.isPending} style={{ border: 'none', borderRadius: '12px', padding: '10px 16px', background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))', color: 'white', cursor: 'pointer', opacity: !form.name.trim() || createMutation.isPending ? 0.6 : 1 }}>
+                        <button onClick={() => createMutation.mutate()} disabled={!form.name.trim() || createMutation.isPending} style={{ border: 'none', borderRadius: '12px', padding: '10px 16px', background: 'var(--color-primary)', color: 'white', cursor: 'pointer', opacity: !form.name.trim() || createMutation.isPending ? 0.6 : 1 }}>
                             {createMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : 'Create'}
                         </button>
                     </div>
@@ -104,7 +104,7 @@ export default function ClubsClient({ initialClubs }: { initialClubs: Club[] }) 
                 {filtered.map((club) => (
                     <article key={club.id} style={{ background: 'var(--color-bg-card)', border: '1px solid var(--color-border)', borderRadius: '20px', padding: '18px', display: 'grid', gap: '10px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: club.avatar_url ? `url(${club.avatar_url}) center/cover` : 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700, fontSize: '18px' }}>
+                            <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: club.avatar_url ? `url(${club.avatar_url}) center/cover` : 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700, fontSize: '18px' }}>
                                 {!club.avatar_url && club.name[0]}
                             </div>
                             <div style={{ minWidth: 0 }}>
@@ -113,7 +113,7 @@ export default function ClubsClient({ initialClubs }: { initialClubs: Club[] }) 
                             </div>
                         </div>
                         <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>{club.description || 'No description yet.'}</p>
-                        <button onClick={() => user && membershipMutation.mutate(club.id)} disabled={!user || membershipMutation.isPending} style={{ border: 'none', borderRadius: '12px', padding: '10px 14px', background: club.is_member ? 'var(--color-bg-elevated)' : 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))', color: club.is_member ? 'var(--color-text-secondary)' : 'white', cursor: 'pointer' }}>
+                        <button onClick={() => user && membershipMutation.mutate(club.id)} disabled={!user || membershipMutation.isPending} style={{ border: 'none', borderRadius: '12px', padding: '10px 14px', background: club.is_member ? 'var(--color-bg-elevated)' : 'var(--color-primary)', color: club.is_member ? 'var(--color-text-secondary)' : 'white', cursor: 'pointer' }}>
                             {club.is_member ? 'Joined' : 'Join club'}
                         </button>
                     </article>

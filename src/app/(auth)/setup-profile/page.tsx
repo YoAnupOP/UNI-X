@@ -172,7 +172,7 @@ export default function SetupProfilePage() {
                     <div style={{
                         width: '64px', height: '64px', borderRadius: '18px', margin: '0 auto 20px',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                        background: 'var(--color-primary)',
                         color: 'white', boxShadow: '0 8px 30px rgba(139, 92, 246, 0.3)',
                     }}>
                         <Sparkles size={28} />
@@ -193,7 +193,7 @@ export default function SetupProfilePage() {
                     {[1, 2].map(s => (
                         <div key={s} style={{
                             width: s === step ? '32px' : '10px', height: '10px', borderRadius: '99px',
-                            background: s <= step ? 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))' : 'var(--color-bg-elevated)',
+                            background: s <= step ? 'var(--color-primary)' : 'var(--color-bg-elevated)',
                             transition: 'all 0.3s ease',
                         }} />
                     ))}
@@ -264,7 +264,7 @@ export default function SetupProfilePage() {
                                 style={{
                                     width: '100%', padding: '14px', borderRadius: '14px', fontSize: '15px', fontWeight: 600,
                                     color: 'white', border: 'none', cursor: usernameStatus !== 'available' ? 'not-allowed' : 'pointer',
-                                    background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                                    background: 'var(--color-primary)',
                                     boxShadow: '0 4px 20px rgba(139, 92, 246, 0.3)',
                                     opacity: usernameStatus !== 'available' ? 0.5 : 1,
                                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
@@ -285,7 +285,7 @@ export default function SetupProfilePage() {
                                         width: '100px', height: '100px', borderRadius: '50%', cursor: 'pointer',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                                         background: avatarPreview ? `url(${avatarPreview}) center/cover` :
-                                            'linear-gradient(135deg, var(--color-primary), var(--color-accent))',
+                                            'var(--color-primary)',
                                         color: 'white', fontSize: '36px', fontWeight: 800, position: 'relative',
                                         border: '4px solid var(--color-bg-elevated)',
                                         boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
@@ -376,7 +376,7 @@ export default function SetupProfilePage() {
                                     style={{
                                         flex: 2, padding: '14px', borderRadius: '14px', fontSize: '15px', fontWeight: 600,
                                         color: 'white', border: 'none', cursor: saving ? 'not-allowed' : 'pointer',
-                                        background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                                        background: 'var(--color-primary)',
                                         boxShadow: '0 4px 20px rgba(139, 92, 246, 0.3)',
                                         opacity: saving ? 0.7 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                                         transition: 'all 0.2s',

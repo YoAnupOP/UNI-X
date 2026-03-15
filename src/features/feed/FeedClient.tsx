@@ -1,9 +1,9 @@
-﻿'use client'
+'use client'
 
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Check, Heart, ImagePlus, Loader2, MessageCircle, Send, Share2, Trash2, UserPlus, X } from 'lucide-react'
+import { Check, ImagePlus, Loader2, MessageCircle, Send, Share2, Trash2, UserPlus, X, Zap } from 'lucide-react'
 import { useAuth } from '@/components/providers/AuthProvider'
 import { Profile } from '@/lib/types'
 import { uploadImage } from '@/lib/upload'
@@ -53,7 +53,7 @@ function PostCard({ post, currentUserId, onLike, onDelete, onComment, now }: {
                 <div style={{ display: 'flex', gap: '12px', minWidth: 0 }}>
                     <div style={{
                         width: '42px', height: '42px', borderRadius: '12px', flexShrink: 0,
-                        background: post.author.avatar_url ? `url(${post.author.avatar_url}) center/cover` : 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                        background: post.author.avatar_url ? `url(${post.author.avatar_url}) center/cover` : 'var(--color-primary)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700,
                     }}>
                         {!post.author.avatar_url && (post.author.full_name?.[0] || 'U')}
@@ -77,8 +77,22 @@ function PostCard({ post, currentUserId, onLike, onDelete, onComment, now }: {
             )}
 
             <div style={{ display: 'flex', gap: '8px', marginTop: '14px', flexWrap: 'wrap' }}>
-                <button onClick={() => onLike(post.id)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: post.is_liked ? '#F87171' : 'var(--color-text-muted)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <Heart size={16} fill={post.is_liked ? 'currentColor' : 'none'} /> {post.likes_count}
+                <button 
+                    onClick={() => onLike(post.id)} 
+                    style={{ 
+                        border: 'none', 
+                        background: 'none', 
+                        cursor: 'pointer', 
+                        color: post.is_liked ? 'var(--color-primary)' : 'var(--color-text-muted)', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '6px',
+                        transition: 'all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                        transform: post.is_liked ? 'scale(1.1)' : 'scale(1)',
+                        filter: post.is_liked ? 'drop-shadow(0 0 8px rgba(139, 92, 246, 0.6))' : 'none'
+                    }}
+                >
+                    <Zap size={16} fill={post.is_liked ? 'currentColor' : 'none'} style={{ transition: 'fill 0.2s' }} /> {post.likes_count}
                 </button>
                 <button onClick={() => setShowComments((prev) => !prev)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <MessageCircle size={16} /> {post.comments_count}
@@ -115,7 +129,7 @@ function PostCard({ post, currentUserId, onLike, onDelete, onComment, now }: {
                                 }
                             }}
                         />
-                        <button onClick={() => void onComment(post.id, commentText).then(() => setCommentText(''))} style={{ border: 'none', borderRadius: '12px', background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))', color: 'white', padding: '0 14px', cursor: 'pointer' }}>
+                        <button onClick={() => void onComment(post.id, commentText).then(() => setCommentText(''))} style={{ border: 'none', borderRadius: '12px', background: 'var(--color-primary)', color: 'white', padding: '0 14px', cursor: 'pointer' }}>
                             <Send size={16} />
                         </button>
                     </div>
@@ -180,12 +194,17 @@ export default function FeedClient({ initialPosts, initialSuggestions, renderedA
         mutationFn: (postId: string) => fetchJson<{ postId: string; likesCount: number; isLiked: boolean }>('/api/feed', { method: 'PATCH', body: JSON.stringify({ postId }) }),
         onMutate: async (postId) => {
             const previous = queryClient.getQueryData<FeedPost[]>(FEED_POSTS_QUERY_KEY) ?? []
-            queryClient.setQueryData(FEED_POSTS_QUERY_KEY, previous.map((post) => post.id === postId ? { ...post, is_liked: !post.is_liked, likes_count: post.likes_count + (post.is_liked ? -1 : 1) } : post))
+            queryClient.setQueryData(FEED_POSTS_QUERY_KEY, previous.map((post) => post.id === postId ? { ...post, is_liked: !post.is_liked, likes_count: Math.max(0, post.likes_count + (post.is_liked ? -1 : 1)) } : post))
             return { previous }
         },
         onError: (_error, _postId, context) => {
             if (context?.previous) queryClient.setQueryData(FEED_POSTS_QUERY_KEY, context.previous)
         },
+        onSuccess: (result) => {
+            queryClient.setQueryData(FEED_POSTS_QUERY_KEY, (current: FeedPost[] | undefined) => 
+                (current ?? []).map((post) => post.id === result.postId ? { ...post, is_liked: result.isLiked, likes_count: result.likesCount } : post)
+            )
+        }
     })
 
     const deleteMutation = useMutation({
@@ -238,7 +257,7 @@ export default function FeedClient({ initialPosts, initialSuggestions, renderedA
                         <div style={{ display: 'flex', gap: '12px' }}>
                             <div style={{
                                 width: '42px', height: '42px', borderRadius: '12px', flexShrink: 0,
-                                background: profile?.avatar_url ? `url(${profile.avatar_url}) center/cover` : 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                                background: profile?.avatar_url ? `url(${profile.avatar_url}) center/cover` : 'var(--color-primary)',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700,
                             }}>
                                 {!profile?.avatar_url && (profile?.full_name?.[0] || 'U')}
@@ -268,7 +287,7 @@ export default function FeedClient({ initialPosts, initialSuggestions, renderedA
                                             </div>
                                             <div style={{ display: 'flex', gap: '8px' }}>
                                                 <button onClick={() => { setComposerOpen(false); setImageFile(null); setImagePreview(null); setContent('') }} style={{ border: 'none', background: 'transparent', color: 'var(--color-text-muted)', borderRadius: '12px', padding: '10px 14px', cursor: 'pointer' }}>Cancel</button>
-                                                <button onClick={() => void handleCreatePost()} disabled={createPostMutation.isPending || (!content.trim() && !imageFile)} style={{ border: 'none', background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))', color: 'white', borderRadius: '12px', padding: '10px 16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', opacity: createPostMutation.isPending || (!content.trim() && !imageFile) ? 0.6 : 1 }}>
+                                                <button onClick={() => void handleCreatePost()} disabled={createPostMutation.isPending || (!content.trim() && !imageFile)} style={{ border: 'none', background: 'var(--color-primary)', color: 'white', borderRadius: '12px', padding: '10px 16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', opacity: createPostMutation.isPending || (!content.trim() && !imageFile) ? 0.6 : 1 }}>
                                                     {createPostMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />} Post
                                                 </button>
                                             </div>
@@ -325,7 +344,7 @@ export default function FeedClient({ initialPosts, initialSuggestions, renderedA
                                         <Link href={`/profile/${suggestion.id}`} style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, color: 'inherit', textDecoration: 'none' }}>
                                             <div style={{
                                                 width: '42px', height: '42px', borderRadius: '14px', flexShrink: 0,
-                                                background: suggestion.avatar_url ? `url(${suggestion.avatar_url}) center/cover` : 'linear-gradient(135deg, var(--color-primary), var(--color-accent))',
+                                                background: suggestion.avatar_url ? `url(${suggestion.avatar_url}) center/cover` : 'var(--color-primary)',
                                                 display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700,
                                                 boxShadow: '0 10px 24px rgba(0, 0, 0, 0.18)',
                                             }}>
@@ -342,7 +361,7 @@ export default function FeedClient({ initialPosts, initialSuggestions, renderedA
                                             style={{
                                                 minWidth: '92px',
                                                 border: 'none',
-                                                background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                                                background: 'var(--color-primary)',
                                                 color: 'white',
                                                 borderRadius: '12px',
                                                 padding: '9px 12px',
@@ -353,7 +372,7 @@ export default function FeedClient({ initialPosts, initialSuggestions, renderedA
                                                 gap: '6px',
                                                 fontSize: '13px',
                                                 fontWeight: 700,
-                                                boxShadow: '0 12px 24px rgba(72, 187, 255, 0.18)',
+
                                                 opacity: isFollowPending ? 0.75 : 1,
                                             }}
                                         >

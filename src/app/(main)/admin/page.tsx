@@ -438,7 +438,7 @@ export default function AdminPage() {
                     <div style={{
                         width: '40px', height: '40px', borderRadius: '12px',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                        background: 'var(--color-primary)',
                         boxShadow: '0 0 24px rgba(139,92,246,0.25)',
                         flexShrink: 0,
                     }}>
@@ -550,7 +550,7 @@ export default function AdminPage() {
                                                             width: '32px', height: '32px', borderRadius: '10px',
                                                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                                                             fontSize: '11px', fontWeight: 700, flexShrink: 0,
-                                                            background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))', color: 'white',
+                                                            background: 'var(--color-primary)', color: 'white',
                                                         }}>
                                                             {u.full_name?.[0] || '?'}
                                                         </div>
@@ -649,7 +649,7 @@ export default function AdminPage() {
                                     <button
                                         onClick={() => { setActiveTab('announcements'); setShowCreateAnnouncement(true) }}
                                         className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
-                                        style={{ background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))', boxShadow: '0 4px 16px rgba(139,92,246,0.25)', transition: 'all 0.2s ease' }}
+                                        style={{ background: 'var(--color-primary)', boxShadow: '0 4px 16px rgba(139,92,246,0.25)', transition: 'all 0.2s ease' }}
                                     >
                                         <Plus size={15} /> New Announcement
                                     </button>
@@ -716,7 +716,7 @@ export default function AdminPage() {
                                                                     width: '34px', height: '34px', borderRadius: '10px',
                                                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                                                                     fontSize: '12px', fontWeight: 700, flexShrink: 0,
-                                                                    background: u.avatar_url ? `url(${u.avatar_url}) center/cover` : 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                                                                    background: u.avatar_url ? `url(${u.avatar_url}) center/cover` : 'var(--color-primary)',
                                                                     color: 'white',
                                                                 }}>
                                                                     {!u.avatar_url && (u.full_name?.[0] || '?')}
@@ -820,7 +820,7 @@ export default function AdminPage() {
                                                         width: '42px', height: '42px', borderRadius: '12px',
                                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                                                         fontWeight: 700, fontSize: '16px', flexShrink: 0,
-                                                        background: c.avatar_url ? `url(${c.avatar_url}) center/cover` : 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                                                        background: c.avatar_url ? `url(${c.avatar_url}) center/cover` : 'var(--color-primary)',
                                                         color: 'white',
                                                     }}>
                                                         {!c.avatar_url && c.name[0]}
@@ -882,7 +882,7 @@ export default function AdminPage() {
                                         display: 'flex', alignItems: 'center', gap: '7px',
                                         padding: '9px 18px', borderRadius: '12px',
                                         fontSize: '13px', fontWeight: 600, color: 'white', marginLeft: 'auto',
-                                        background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                                        background: 'var(--color-primary)',
                                         boxShadow: '0 4px 12px rgba(139,92,246,0.2)',
                                         border: 'none', cursor: 'pointer',
                                     }}
@@ -911,7 +911,7 @@ export default function AdminPage() {
                                                 style={{
                                                     display: 'flex', alignItems: 'center', gap: '7px',
                                                     padding: '8px 20px', borderRadius: '10px', fontSize: '13px', fontWeight: 600, color: 'white',
-                                                    background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                                                    background: 'var(--color-primary)',
                                                     opacity: actionLoading === 'create-event' ? 0.7 : 1, border: 'none', cursor: 'pointer',
                                                 }}
                                             >
@@ -980,7 +980,7 @@ export default function AdminPage() {
                                         display: 'flex', alignItems: 'center', gap: '7px',
                                         padding: '9px 18px', borderRadius: '12px',
                                         fontSize: '13px', fontWeight: 600, color: 'white', marginLeft: 'auto',
-                                        background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                                        background: 'var(--color-primary)',
                                         boxShadow: '0 4px 12px rgba(139,92,246,0.2)',
                                         border: 'none', cursor: 'pointer',
                                     }}
@@ -1010,7 +1010,7 @@ export default function AdminPage() {
                                                 style={{
                                                     display: 'flex', alignItems: 'center', gap: '7px',
                                                     padding: '8px 20px', borderRadius: '10px', fontSize: '13px', fontWeight: 600, color: 'white',
-                                                    background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                                                    background: 'var(--color-primary)',
                                                     opacity: actionLoading === 'create-announcement' ? 0.7 : 1, border: 'none', cursor: 'pointer',
                                                 }}
                                             >
@@ -1043,7 +1043,7 @@ export default function AdminPage() {
                                                 style={{
                                                     display: 'flex', alignItems: 'center', gap: '7px',
                                                     padding: '8px 20px', borderRadius: '10px', fontSize: '13px', fontWeight: 600, color: 'white',
-                                                    background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                                                    background: 'var(--color-primary)',
                                                     border: 'none', cursor: 'pointer',
                                                 }}
                                             >
@@ -1159,7 +1159,7 @@ export default function AdminPage() {
                                                                 width: '28px', height: '28px', borderRadius: '8px',
                                                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                                                 fontSize: '10px', fontWeight: 700, flexShrink: 0,
-                                                                background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))', color: 'white',
+                                                                background: 'var(--color-primary)', color: 'white',
                                                             }}>
                                                                 {item.author.full_name?.[0] || '?'}
                                                             </div>

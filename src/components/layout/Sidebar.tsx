@@ -1,7 +1,8 @@
-﻿'use client'
+'use client'
 
 import { useAuth } from '@/components/providers/AuthProvider'
 import PrefetchLink from '@/components/navigation/PrefetchLink'
+import { Logo } from "@/components/Logo"
 import { usePathname } from 'next/navigation'
 import {
     Home,
@@ -63,18 +64,7 @@ export default function Sidebar() {
                 minHeight: '64px',
             }}>
                 <PrefetchLink href="/feed" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <div style={{
-                        width: '32px', height: '32px', borderRadius: '10px',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
-                        color: 'white', fontWeight: 700, fontSize: '14px', fontFamily: 'var(--font-display)',
-                        flexShrink: 0,
-                    }}>X</div>
-                    {!collapsed && (
-                        <span style={{ fontSize: '18px', fontWeight: 700, fontFamily: 'var(--font-display)', letterSpacing: '-0.02em' }}>
-                            UNI-X
-                        </span>
-                    )}
+                    {collapsed ? <Logo variant="mark" size="sm" /> : <Logo size="sm" />}
                 </PrefetchLink>
                 {!collapsed && (
                     <button onClick={() => setCollapsed(true)} style={{
@@ -127,7 +117,7 @@ export default function Sidebar() {
                                     <span style={{
                                         marginLeft: 'auto', padding: '2px 6px', borderRadius: '6px',
                                         fontSize: '9px', fontWeight: 700, textTransform: 'uppercase',
-                                        background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                                        background: 'var(--color-primary)',
                                         color: 'white',
                                     }}>AI</span>
                                 )}
@@ -140,11 +130,15 @@ export default function Sidebar() {
                             href="/admin"
                             style={{
                                 display: 'flex', alignItems: 'center', gap: '12px',
-                                padding: collapsed ? '10px 0' : '10px 12px', borderRadius: '10px',
+                                paddingBottom: collapsed ? '10px' : '10px',
+                                paddingTop: '16px',
+                                paddingLeft: collapsed ? '0' : '12px',
+                                paddingRight: collapsed ? '0' : '12px',
+                                borderRadius: '10px',
                                 fontSize: '14px', color: isActive('/admin') ? 'var(--color-primary)' : 'var(--color-text-secondary)',
                                 backgroundColor: isActive('/admin') ? 'var(--color-primary-light)' : 'transparent',
                                 justifyContent: collapsed ? 'center' : 'flex-start', marginTop: '8px',
-                                borderTop: '1px solid var(--color-border)', paddingTop: '16px',
+                                borderTop: '1px solid var(--color-border)',
                             }}
                         >
                             <Shield size={18} style={{ flexShrink: 0 }} />
@@ -177,8 +171,12 @@ export default function Sidebar() {
 
                 <div style={{
                     display: 'flex', alignItems: 'center', gap: '10px',
-                    padding: collapsed ? '10px 0' : '10px 12px', marginTop: '4px',
-                    borderTop: '1px solid var(--color-border)', paddingTop: '12px',
+                    paddingBottom: collapsed ? '10px' : '10px',
+                    paddingTop: '12px',
+                    paddingLeft: collapsed ? '0' : '12px',
+                    paddingRight: collapsed ? '0' : '12px',
+                    marginTop: '4px',
+                    borderTop: '1px solid var(--color-border)',
                     justifyContent: collapsed ? 'center' : 'flex-start',
                 }}>
                     <div style={{
@@ -186,7 +184,7 @@ export default function Sidebar() {
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         background: profile?.avatar_url
                             ? `url(${profile.avatar_url}) center/cover`
-                            : 'linear-gradient(135deg, var(--color-primary), var(--color-accent))',
+                            : 'var(--color-primary)',
                         color: 'white', fontSize: '13px', fontWeight: 700,
                     }}>
                         {!profile?.avatar_url && (profile?.full_name?.[0] || 'U')}

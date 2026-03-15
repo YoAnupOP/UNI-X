@@ -107,7 +107,7 @@ export default function XploreAIClient() {
     return (
         <div style={{ maxWidth: '920px', margin: '0 auto', display: 'grid', gap: '20px' }}>
             <section style={{
-                background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.16), rgba(14, 165, 233, 0.08))',
+                background: 'rgba(139, 92, 246, 0.16)',
                 border: '1px solid rgba(59, 130, 246, 0.2)',
                 borderRadius: '28px',
                 padding: '24px',
@@ -120,7 +120,7 @@ export default function XploreAIClient() {
                             width: '48px',
                             height: '48px',
                             borderRadius: '16px',
-                            background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                            background: 'var(--color-primary)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -227,7 +227,7 @@ export default function XploreAIClient() {
                         <div style={{
                             maxWidth: '82%',
                             background: message.role === 'user'
-                                ? 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))'
+                                ? 'var(--color-primary)'
                                 : 'var(--color-bg-elevated)',
                             color: message.role === 'user' ? 'white' : 'var(--color-text-primary)',
                             borderRadius: '20px',
@@ -306,7 +306,7 @@ export default function XploreAIClient() {
                         borderRadius: '18px',
                         padding: '0 18px',
                         height: '56px',
-                        background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                        background: 'var(--color-primary)',
                         color: 'white',
                         cursor: 'pointer',
                         opacity: !input.trim() || askAiMutation.isPending ? 0.6 : 1,

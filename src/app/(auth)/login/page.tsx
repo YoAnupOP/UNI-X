@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { Logo } from '@/components/Logo'
 import { ArrowRight, Eye, EyeOff, Loader2, Mail, Lock, Sparkles } from 'lucide-react'
 
 export default function LoginPage() {
@@ -43,7 +44,7 @@ export default function LoginPage() {
                 flex: 1,
                 position: 'relative',
                 overflow: 'hidden',
-                background: 'linear-gradient(135deg, rgba(139,92,246,0.15), rgba(56,189,248,0.08))',
+                background: 'rgba(139,92,246,0.1)',
                 borderRight: '1px solid var(--color-border)',
                 padding: '60px',
                 flexDirection: 'column',
@@ -60,16 +61,8 @@ export default function LoginPage() {
                 }} />
 
                 <div style={{ position: 'relative', zIndex: 1 }}>
-                    <div style={{
-                        display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '48px',
-                    }}>
-                        <div style={{
-                            width: '48px', height: '48px', borderRadius: '14px',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
-                            color: 'white', fontWeight: 700, fontSize: '20px', fontFamily: 'var(--font-display)',
-                        }}>X</div>
-                        <span style={{ fontSize: '28px', fontWeight: 700, fontFamily: 'var(--font-display)', letterSpacing: '-0.02em' }}>UNI-X</span>
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '48px' }}>
+                        <Logo size="lg" />
                     </div>
 
                     <h2 style={{
@@ -115,13 +108,12 @@ export default function LoginPage() {
                 <div style={{ width: '100%', maxWidth: '400px', position: 'relative', zIndex: 1 }}>
                     {/* Mobile Logo */}
                     <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-                        <div style={{
-                            width: '56px', height: '56px', borderRadius: '16px', margin: '0 auto 16px',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
-                            color: 'white', fontWeight: 700, fontSize: '24px', fontFamily: 'var(--font-display)',
-                            boxShadow: '0 8px 30px rgba(139, 92, 246, 0.3)',
-                        }}>X</div>
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 32 }}>
+                            <Logo size="lg" />
+                            <p style={{ marginTop: 8, color: "var(--color-text-muted)", fontSize: 13, letterSpacing: "0.1em", textTransform: "uppercase" }}>
+                                University Xplore
+                            </p>
+                        </div>
                         <h1 style={{
                             fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 700,
                             letterSpacing: '-0.02em', marginBottom: '6px',
@@ -198,7 +190,7 @@ export default function LoginPage() {
                             style={{
                                 width: '100%', padding: '14px', borderRadius: '12px', fontSize: '15px', fontWeight: 600,
                                 color: 'white', border: 'none', cursor: loading ? 'not-allowed' : 'pointer',
-                                background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                                background: 'var(--color-primary)',
                                 boxShadow: '0 4px 20px rgba(139, 92, 246, 0.3)',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                                 opacity: loading ? 0.7 : 1, transition: 'all 0.2s', marginTop: '4px',

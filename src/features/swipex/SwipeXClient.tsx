@@ -284,12 +284,12 @@ export function SwipeXClient({ initialCandidates }: { initialCandidates: SwipeCa
                         </div>
                     ) : !current ? (
                         <div style={{ textAlign: 'center', padding: '100px 24px', borderRadius: 32, backgroundColor: 'var(--color-bg-card)', border: '1px solid var(--color-border)', boxShadow: '0 20px 40px rgba(0,0,0,0.08)', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                            <div style={{ width: 90, height: 90, borderRadius: '50%', margin: '0 auto 24px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, rgba(139,92,246,0.1), rgba(56,189,248,0.1))' }}>
+                            <div style={{ width: 90, height: 90, borderRadius: '50%', margin: '0 auto 24px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(139,92,246,0.1)' }}>
                                 <Sparkles size={40} style={{ color: 'var(--color-primary)' }} />
                             </div>
                             <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 800, margin: '0 0 12px 0' }}>You&apos;re all caught up!</h3>
                             <p style={{ fontSize: 15, color: 'var(--color-text-muted)', margin: '0 0 32px 0', lineHeight: 1.6, maxWidth: 320 }}>You&apos;ve seen all the students matching your criteria right now. Check back later for new faces.</p>
-                            <button onClick={() => void deckQuery.refetch()} style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '16px 32px', borderRadius: 99, fontSize: 16, fontWeight: 700, color: 'white', background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))', border: 'none', cursor: 'pointer', boxShadow: '0 10px 25px rgba(139,92,246,0.3)', transition: 'transform 0.2s' }}>
+                            <button onClick={() => void deckQuery.refetch()} style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '16px 32px', borderRadius: 99, fontSize: 16, fontWeight: 700, color: 'white', background: 'var(--color-primary)', border: 'none', cursor: 'pointer', boxShadow: '0 10px 25px rgba(139,92,246,0.3)', transition: 'transform 0.2s' }}>
                                 <RefreshCw size={20} /> Refresh Deck
                             </button>
                         </div>
@@ -300,7 +300,7 @@ export function SwipeXClient({ initialCandidates }: { initialCandidates: SwipeCa
                                 
                                 {next && (
                                     <div style={{ position: 'absolute', inset: 0, borderRadius: 32, overflow: 'hidden', backgroundColor: 'var(--color-bg-card)', transform: `scale(${0.92 + Math.min(Math.abs(dragOffset.x) / 1800, 0.08)}) translateY(${12 - Math.min(Math.abs(dragOffset.x) / 20, 12)}px)`, opacity: 0.5 + Math.min(Math.abs(dragOffset.x) / 400, 0.5), transition: isDragging ? 'none' : 'all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}>
-                                        <div style={{ position: 'absolute', inset: 0, background: next.avatar_url ? `url(${next.avatar_url}) center/cover` : 'linear-gradient(135deg, var(--color-secondary), var(--color-accent))' }} />
+                                        <div style={{ position: 'absolute', inset: 0, background: next.avatar_url ? `url(${next.avatar_url}) center/cover` : 'var(--color-primary)' }} />
                                     </div>
                                 )}
 
@@ -322,7 +322,7 @@ export function SwipeXClient({ initialCandidates }: { initialCandidates: SwipeCa
                                     }}
                                 >
                                     {/* Full bleed image */}
-                                    <div style={{ position: 'absolute', inset: 0, background: current.avatar_url ? `url(${current.avatar_url}) center/cover` : 'linear-gradient(135deg, var(--color-primary), var(--color-accent))' }} />
+                                    <div style={{ position: 'absolute', inset: 0, background: current.avatar_url ? `url(${current.avatar_url}) center/cover` : 'var(--color-primary)' }} />
                                     
                                     {/* Smooth gradient overlay from bottom. Made taller to accommodate hints. */}
                                     <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 35%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.96) 100%)' }} />
@@ -388,7 +388,7 @@ export function SwipeXClient({ initialCandidates }: { initialCandidates: SwipeCa
                                 <button onClick={() => beginSwipe('pass')} disabled={swiping || isSwipePending || limitReached} style={{ width: 68, height: 68, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--color-bg-card)', border: '1px solid var(--color-border)', color: '#F87171', cursor: swiping ? 'not-allowed' : 'pointer', boxShadow: '0 10px 25px rgba(0,0,0,0.06)', transition: 'transform 0.2s', transform: swiping ? 'scale(0.9)' : 'scale(1)' }}>
                                     <X size={32} strokeWidth={2.5} />
                                 </button>
-                                <button onClick={() => beginSwipe('like')} disabled={swiping || isSwipePending || limitReached} style={{ width: 88, height: 88, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #34D399, #10B981)', color: 'white', border: 'none', cursor: swiping ? 'not-allowed' : 'pointer', boxShadow: '0 15px 35px rgba(16,185,129,0.35)', transition: 'transform 0.2s', transform: swiping ? 'scale(0.9)' : 'scale(1)' }}>
+                                <button onClick={() => beginSwipe('like')} disabled={swiping || isSwipePending || limitReached} style={{ width: 88, height: 88, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-primary)', color: 'white', border: 'none', cursor: swiping ? 'not-allowed' : 'pointer', boxShadow: '0 15px 35px rgba(16,185,129,0.35)', transition: 'transform 0.2s', transform: swiping ? 'scale(0.9)' : 'scale(1)' }}>
                                     <Heart size={42} strokeWidth={2.5} fill="white" />
                                 </button>
                             </div>
@@ -425,7 +425,7 @@ export function SwipeXClient({ initialCandidates }: { initialCandidates: SwipeCa
                             {matchesQuery.data.matches.map((match) => (
                                 <div key={match.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 16, background: 'var(--color-bg-card)', borderRadius: 24, border: '1px solid var(--color-border)', boxShadow: '0 4px 15px rgba(0,0,0,0.03)', transition: 'transform 0.2s' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                                        <div style={{ width: 64, height: 64, borderRadius: 20, background: match.matched_user?.avatar_url ? `url(${match.matched_user.avatar_url}) center/cover` : 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, fontWeight: 800, color: 'white' }}>
+                                        <div style={{ width: 64, height: 64, borderRadius: 20, background: match.matched_user?.avatar_url ? `url(${match.matched_user.avatar_url}) center/cover` : 'var(--color-primary)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, fontWeight: 800, color: 'white' }}>
                                             {!match.matched_user?.avatar_url && (match.matched_user?.full_name?.[0] || '?')}
                                         </div>
                                         <div>
@@ -436,7 +436,7 @@ export function SwipeXClient({ initialCandidates }: { initialCandidates: SwipeCa
                                         </div>
                                     </div>
                                     <div style={{ display: 'flex', gap: 8 }}>
-                                        <button onClick={() => startConversation(match.matched_user?.id!)} disabled={startingChat === match.matched_user?.id} style={{ padding: '10px 18px', borderRadius: 99, background: 'linear-gradient(135deg, var(--color-primary), var(--color-accent))', color: 'white', border: 'none', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, boxShadow: '0 4px 10px rgba(139,92,246,0.2)' }}>
+                                        <button onClick={() => startConversation(match.matched_user?.id!)} disabled={startingChat === match.matched_user?.id} style={{ padding: '10px 18px', borderRadius: 99, background: 'var(--color-primary)', color: 'white', border: 'none', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, boxShadow: '0 4px 10px rgba(139,92,246,0.2)' }}>
                                             {startingChat === match.matched_user?.id ? <Loader2 size={18} className="animate-spin" /> : <MessageCircle size={18} fill="currentColor" />} <span className="hide-mobile">Message</span>
                                         </button>
                                         <button onClick={() => { if(confirm('Remove this match?')) deleteMatchMutation.mutate(match.id) }} disabled={deleteMatchMutation.isPending} style={{ padding: '10px', borderRadius: 99, background: 'var(--color-bg-elevated)', color: 'var(--color-text-muted)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
@@ -461,22 +461,22 @@ export function SwipeXClient({ initialCandidates }: { initialCandidates: SwipeCa
                     <div style={{ textAlign: 'center', maxWidth: 420, width: '100%', position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                         
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 32, position: 'relative' }}>
-                            <div style={{ width: 120, height: 120, borderRadius: '50%', background: myProfile?.avatar_url ? `url(${myProfile.avatar_url}) center/cover` : 'linear-gradient(135deg, var(--color-primary), var(--color-accent))', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 40, fontWeight: 800, border: '5px solid #080A0F', zIndex: 2, transform: 'translateX(20px)', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}>
+                            <div style={{ width: 120, height: 120, borderRadius: '50%', background: myProfile?.avatar_url ? `url(${myProfile.avatar_url}) center/cover` : 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 40, fontWeight: 800, border: '5px solid #080A0F', zIndex: 2, transform: 'translateX(20px)', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}>
                                 {!myProfile?.avatar_url && (myProfile?.full_name?.[0] || 'U')}
                             </div>
-                            <div style={{ width: 120, height: 120, borderRadius: '50%', background: showMatch.avatar_url ? `url(${showMatch.avatar_url}) center/cover` : 'linear-gradient(135deg, var(--color-secondary), var(--color-accent))', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 40, fontWeight: 800, border: '5px solid #080A0F', zIndex: 1, transform: 'translateX(-20px)', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}>
+                            <div style={{ width: 120, height: 120, borderRadius: '50%', background: showMatch.avatar_url ? `url(${showMatch.avatar_url}) center/cover` : 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 40, fontWeight: 800, border: '5px solid #080A0F', zIndex: 1, transform: 'translateX(-20px)', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}>
                                 {!showMatch.avatar_url && (showMatch.full_name?.[0] || '?')}
                             </div>
-                            <div style={{ position: 'absolute', bottom: -10, left: '50%', transform: 'translateX(-50%)', width: 48, height: 48, borderRadius: '50%', background: 'linear-gradient(135deg, #F43F5E, #EC4899)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', zIndex: 3, border: '4px solid #080A0F', boxShadow: '0 10px 20px rgba(244,63,94,0.4)' }}>
+                            <div style={{ position: 'absolute', bottom: -10, left: '50%', transform: 'translateX(-50%)', width: 48, height: 48, borderRadius: '50%', background: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', zIndex: 3, border: '4px solid #080A0F', boxShadow: '0 10px 20px rgba(244,63,94,0.4)' }}>
                                 <Heart size={24} fill="white" />
                             </div>
                         </div>
 
-                        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 48, fontWeight: 900, margin: '0 0 12px 0', background: 'linear-gradient(to right, #34D399, #10B981, #3B82F6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '-0.02em', filter: 'drop-shadow(0 2px 10px rgba(52,211,153,0.3))' }}>It&apos;s a Match!</h2>
+                        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 48, fontWeight: 900, margin: '0 0 12px 0', background: 'var(--color-primary)', color: 'var(--color-primary)', letterSpacing: '-0.02em', filter: 'drop-shadow(0 2px 10px rgba(52,211,153,0.3))' }}>It&apos;s a Match!</h2>
                         <p style={{ fontSize: 17, color: 'rgba(255,255,255,0.85)', margin: '0 0 40px 0', lineHeight: 1.5 }}>You and <strong style={{ color: 'white', fontSize: 19 }}>{showMatch.full_name}</strong> both swiped right. Don&apos;t keep them waiting!</p>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 14, width: '100%' }}>
-                            <button onClick={() => startConversation(showMatch.id)} disabled={startingChat === showMatch.id} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '18px 24px', borderRadius: 99, fontSize: 17, fontWeight: 700, color: 'white', background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))', border: 'none', cursor: 'pointer', boxShadow: '0 10px 30px rgba(139,92,246,0.3)', transition: 'transform 0.2s' }}>
+                            <button onClick={() => startConversation(showMatch.id)} disabled={startingChat === showMatch.id} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '18px 24px', borderRadius: 99, fontSize: 17, fontWeight: 700, color: 'white', background: 'var(--color-primary)', border: 'none', cursor: 'pointer', boxShadow: '0 10px 30px rgba(139,92,246,0.3)', transition: 'transform 0.2s' }}>
                                 {startingChat === showMatch.id ? <Loader2 size={22} className="animate-spin" /> : <MessageCircle size={22} />}
                                 {startingChat === showMatch.id ? 'Opening chat...' : 'Send a Message'}
                             </button>

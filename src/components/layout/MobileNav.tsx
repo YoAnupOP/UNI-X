@@ -1,10 +1,11 @@
-﻿'use client'
+'use client'
 
 import PrefetchLink from '@/components/navigation/PrefetchLink'
 import { usePathname } from 'next/navigation'
 import { Home, Users, Repeat2, MessageCircle, Menu, X, Settings, LogOut, User, Calendar, Megaphone, Image as ImageIcon, Sparkles, Bell, Shield } from 'lucide-react'
 import { useAuth } from '@/components/providers/AuthProvider'
 import { useState, useEffect, useRef } from 'react'
+import { Logo } from "@/components/Logo"
 
 export default function MobileNav() {
     const pathname = usePathname()
@@ -88,7 +89,7 @@ export default function MobileNav() {
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                             background: profile.avatar_url
                                 ? `url(${profile.avatar_url}) center/cover`
-                                : 'linear-gradient(135deg, var(--color-primary), var(--color-accent))',
+                                : 'var(--color-primary)',
                             color: 'white', fontSize: '15px', fontWeight: 700,
                         }}>
                             {!profile.avatar_url && (profile.full_name?.[0] || 'U')}
@@ -176,7 +177,7 @@ export default function MobileNav() {
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                                background: 'var(--color-primary)',
                                 color: 'white',
                                 boxShadow: '0 4px 16px rgba(139, 92, 246, 0.35)',
                                 transform: 'translateY(-8px)',

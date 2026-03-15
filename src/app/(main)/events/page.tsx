@@ -112,7 +112,7 @@ export default function EventsPage() {
                     style={{
                         display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px',
                         borderRadius: '12px', fontSize: '14px', fontWeight: 600, color: 'white',
-                        background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                        background: 'var(--color-primary)',
                         border: 'none', cursor: 'pointer',
                     }}
                 >
@@ -195,7 +195,7 @@ export default function EventsPage() {
                             style={{
                                 display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 20px',
                                 borderRadius: '12px', fontSize: '14px', fontWeight: 600, color: 'white',
-                                background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                                background: 'var(--color-primary)',
                                 border: 'none', cursor: creating ? 'not-allowed' : 'pointer', opacity: creating ? 0.5 : 1,
                             }}
                         >

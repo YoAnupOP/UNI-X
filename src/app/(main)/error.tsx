@@ -25,7 +25,7 @@ export default function MainError({ error, reset }: { error: Error & { digest?: 
                         border: 'none',
                         cursor: 'pointer',
                         color: 'white',
-                        background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                        background: 'var(--color-primary)',
                     }}
                 >
                     Try again

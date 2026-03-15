@@ -422,7 +422,7 @@ export default function MessagesClient({
                             return (
                                 <button key={conversation.id} onClick={() => { setManualSelection(conversation.id); router.replace(`/messages?convo=${conversation.id}`, { scroll: false }) }} onMouseEnter={() => prefetchConversation(conversation.id)} onFocus={() => prefetchConversation(conversation.id)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', textAlign: 'left', border: 'none', borderBottom: '1px solid var(--color-border)', cursor: 'pointer', backgroundColor: active ? 'var(--color-bg-elevated)' : 'transparent' }}>
                                     <div style={{ position: 'relative', flexShrink: 0 }}>
-                                        <div style={{ width: 48, height: 48, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: participant?.avatar_url ? `url(${participant.avatar_url}) center/cover` : 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))', color: 'white', fontSize: 16, fontWeight: 600 }}>
+                                        <div style={{ width: 48, height: 48, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: participant?.avatar_url ? `url(${participant.avatar_url}) center/cover` : 'var(--color-primary)', color: 'white', fontSize: 16, fontWeight: 600 }}>
                                             {!participant?.avatar_url && (participant?.full_name?.[0] || participant?.username?.[0] || '?')}
                                         </div>
                                         <PresenceDot online={participantOnline} size={14} style={{ position: 'absolute', bottom: -1, right: -1 }} />
@@ -451,7 +451,7 @@ export default function MessagesClient({
                             <header style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 20px', borderBottom: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-card)' }}>
                                 <button className="mobile-back-btn" onClick={() => { setManualSelection(null); router.replace('/messages', { scroll: false }) }} style={{ padding: 6, border: 'none', background: 'none', cursor: 'pointer', color: 'var(--color-text-muted)', display: 'none', borderRadius: 8 }}><ChevronLeft size={22} /></button>
                                 <div style={{ position: 'relative', flexShrink: 0 }}>
-                                    <div style={{ width: 40, height: 40, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: activeParticipant?.avatar_url ? `url(${activeParticipant.avatar_url}) center/cover` : 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))', color: 'white', fontSize: 15, fontWeight: 600 }}>
+                                    <div style={{ width: 40, height: 40, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: activeParticipant?.avatar_url ? `url(${activeParticipant.avatar_url}) center/cover` : 'var(--color-primary)', color: 'white', fontSize: 15, fontWeight: 600 }}>
                                         {!activeParticipant?.avatar_url && (activeParticipant?.full_name?.[0] || activeParticipant?.username?.[0] || '?')}
                                     </div>
                                     <PresenceDot online={isParticipantOnline} size={12} style={{ position: 'absolute', bottom: -1, right: -1 }} />
@@ -491,7 +491,7 @@ export default function MessagesClient({
 
                             <div style={{ padding: '12px 20px', borderTop: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', gap: 10, backgroundColor: 'var(--color-bg-card)' }}>
                                 <input type="text" value={draft} onChange={(event) => { setDraft(event.target.value); if (event.target.value.trim()) sendTypingSignal() }} placeholder="Type a message..." style={{ flex: 1, padding: '12px 16px', borderRadius: 24, fontSize: 14, outline: 'none', backgroundColor: 'var(--color-bg-elevated)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} onKeyDown={(event) => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); handleSend() } }} />
-                                <button onClick={handleSend} disabled={!draft.trim()} style={{ padding: 12, borderRadius: '50%', border: 'none', cursor: !draft.trim() ? 'not-allowed' : 'pointer', background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))', color: 'white', opacity: !draft.trim() ? 0.5 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: 44, height: 44, flexShrink: 0 }}><Send size={18} /></button>
+                                <button onClick={handleSend} disabled={!draft.trim()} style={{ padding: 12, borderRadius: '50%', border: 'none', cursor: !draft.trim() ? 'not-allowed' : 'pointer', background: 'var(--color-primary)', color: 'white', opacity: !draft.trim() ? 0.5 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: 44, height: 44, flexShrink: 0 }}><Send size={18} /></button>
                             </div>
                         </>
                     )}

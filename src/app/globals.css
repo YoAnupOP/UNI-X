@@ -125,6 +125,11 @@ img {
   background: var(--color-text-muted);
 }
 
+/* ===== Typography Additions ===== */
+.font-syne {
+  font-family: var(--font-syne), system-ui, sans-serif;
+}
+
 /* ===== Utility Classes ===== */
 .glass {
   background: rgba(20, 20, 25, 0.8);
@@ -134,18 +139,18 @@ img {
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
   background-clip: text;
+  color: transparent;
 }
 
 .gradient-bg {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
 }
 
 .gradient-accent {
-  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-primary) 100%);
+  background: linear-gradient(135deg, var(--color-accent), var(--color-warning));
 }
 
 .animate-in {

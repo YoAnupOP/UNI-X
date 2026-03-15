@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Logo } from '@/components/Logo'
 import {
   ArrowRight,
   Users,
@@ -19,42 +20,42 @@ const features = [
     title: 'Clubs & Communities',
     description: 'Join campus clubs, engage in discussions, and find your tribe.',
     color: '#8B5CF6',
-    gradient: 'linear-gradient(135deg, #8B5CF6, #6D28D9)',
+    gradient: 'var(--color-primary)',
   },
   {
     icon: Repeat2,
     title: 'SwipeX',
     description: 'Discover and connect with students who share your interests.',
     color: '#FB923C',
-    gradient: 'linear-gradient(135deg, #FB923C, #EA580C)',
+    gradient: 'var(--color-primary)',
   },
   {
     icon: Calendar,
     title: 'Events & Announcements',
     description: 'Never miss a campus event. RSVP and stay in the loop.',
     color: '#38BDF8',
-    gradient: 'linear-gradient(135deg, #38BDF8, #0284C7)',
+    gradient: 'var(--color-primary)',
   },
   {
     icon: MessageCircle,
     title: 'Social Feed & DMs',
     description: 'Share moments, react to posts, and message peers directly.',
     color: '#34D399',
-    gradient: 'linear-gradient(135deg, #34D399, #059669)',
+    gradient: 'var(--color-primary)',
   },
   {
     icon: ImageIcon,
     title: 'UniWall',
     description: 'Your campus memory board. Share photos and achievements.',
     color: '#F87171',
-    gradient: 'linear-gradient(135deg, #F87171, #DC2626)',
+    gradient: 'var(--color-primary)',
   },
   {
     icon: Sparkles,
     title: 'XPLORE AI',
     description: 'AI-powered academic help, smart suggestions, and reminders.',
     color: '#FBBF24',
-    gradient: 'linear-gradient(135deg, #FBBF24, #D97706)',
+    gradient: 'var(--color-primary)',
   },
 ]
 
@@ -83,24 +84,7 @@ export default function LandingPage() {
       }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '10px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
-              color: 'white',
-              fontWeight: 700,
-              fontSize: '16px',
-              fontFamily: 'var(--font-display)',
-            }}>
-              X
-            </div>
-            <span style={{ fontSize: '20px', fontWeight: 700, fontFamily: 'var(--font-display)', letterSpacing: '-0.02em' }}>
-              UNI-X
-            </span>
+            <Logo size="sm" />
           </Link>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Link
@@ -125,7 +109,7 @@ export default function LandingPage() {
                 fontWeight: 600,
                 borderRadius: '12px',
                 color: 'white',
-                background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                background: 'var(--color-primary)',
                 transition: 'all 0.2s',
               }}
             >
@@ -250,7 +234,7 @@ export default function LandingPage() {
                 fontWeight: 600,
                 borderRadius: '14px',
                 color: 'white',
-                background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                background: 'var(--color-primary)',
                 boxShadow: '0 4px 24px rgba(139, 92, 246, 0.35)',
                 transition: 'all 0.2s',
               }}
@@ -490,7 +474,7 @@ export default function LandingPage() {
           borderRadius: '28px',
           position: 'relative',
           overflow: 'hidden',
-          background: 'linear-gradient(135deg, rgba(139,92,246,0.12) 0%, rgba(56,189,248,0.08) 100%)',
+          background: 'rgba(139,92,246,0.1)',
           border: '1px solid rgba(139, 92, 246, 0.15)',
         }}>
           {/* Glow */}
@@ -551,7 +535,7 @@ export default function LandingPage() {
                 fontWeight: 600,
                 borderRadius: '14px',
                 color: 'white',
-                background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                background: 'var(--color-primary)',
                 boxShadow: '0 4px 24px rgba(139, 92, 246, 0.35)',
                 transition: 'all 0.2s',
               }}
@@ -577,22 +561,7 @@ export default function LandingPage() {
           gap: '16px',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{
-              width: '28px',
-              height: '28px',
-              borderRadius: '8px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
-              color: 'white',
-              fontSize: '12px',
-              fontWeight: 700,
-              fontFamily: 'var(--font-display)',
-            }}>
-              X
-            </div>
-            <span style={{ fontSize: '14px', fontWeight: 600, fontFamily: 'var(--font-display)' }}>UNI-X</span>
+            <Logo size="sm" />
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
             <Link href="#features" style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>Features</Link>

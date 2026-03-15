@@ -117,7 +117,7 @@ export default function UniWallPage() {
                     style={{
                         display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px',
                         borderRadius: '12px', fontSize: '14px', fontWeight: 600, color: 'white',
-                        background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                        background: 'var(--color-primary)',
                         border: 'none', cursor: 'pointer',
                     }}
                 >
@@ -224,7 +224,7 @@ export default function UniWallPage() {
                             className="hover-lift"
                             style={{
                                 width: '100%', padding: '14px', borderRadius: '12px', fontSize: '15px', fontWeight: 600, color: 'white',
-                                background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                                background: 'var(--color-primary)',
                                 border: 'none', cursor: (creating || !imageFile) ? 'not-allowed' : 'pointer',
                                 opacity: (creating || !imageFile) ? 0.5 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center'
                             }}

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Search, Bell, Sparkles, Loader2, Users, Calendar, FileText, User, X } from 'lucide-react'
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { Logo } from "@/components/Logo"
 
 interface SearchResults {
     people: { id: string; username: string; full_name: string; display_name: string; avatar_url: string; university: string; department: string }[]
@@ -157,70 +158,74 @@ export default function TopBar() {
             overflow: 'visible',
         }}>
             {/* Search */}
-            <div ref={containerRef} style={{ position: 'relative', flex: 1, minWidth: 0, maxWidth: '480px' }}>
-                <div
-                    onClick={() => { if (!open) { setOpen(true); setTimeout(() => inputRef.current?.focus(), 0) } }}
-                    style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        padding: '8px 14px',
-                        borderRadius: open ? '10px 10px 0 0' : '10px',
-                        backgroundColor: 'var(--color-bg-card)',
-                        borderTop: `1px solid ${open ? 'var(--color-primary)' : 'var(--color-border)'}`,
-                        borderLeft: `1px solid ${open ? 'var(--color-primary)' : 'var(--color-border)'}`,
-                        borderRight: `1px solid ${open ? 'var(--color-primary)' : 'var(--color-border)'}`,
-                        borderBottom: open && hasQuery ? '1px solid var(--color-border)' : `1px solid ${open ? 'var(--color-primary)' : 'var(--color-border)'}`,
-                        cursor: 'text',
-                        transition: 'border-color 0.15s',
-                    }}
-                >
-                    {searching ? (
-                        <Loader2 size={15} style={{ color: 'var(--color-primary)', flexShrink: 0, animation: 'spin 1s linear infinite' }} />
-                    ) : (
-                        <Search size={15} style={{ color: 'var(--color-text-muted)', flexShrink: 0 }} />
-                    )}
-                    <input
-                        ref={inputRef}
-                        type="text"
-                        placeholder="Search people, clubs, events..."
-                        value={query}
-                        onChange={e => setQuery(e.target.value)}
-                        onFocus={() => setOpen(true)}
-                        onKeyDown={handleKeyDown}
+            <div ref={containerRef} style={{ position: 'relative', flex: 1, minWidth: 0, maxWidth: '480px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Link href="/feed" className="flex md:hidden items-center shrink-0" aria-label="Home">
+                    <Logo variant="mark" size="sm" />
+                </Link>
+                <div style={{ position: 'relative', width: '100%', flex: 1 }}>
+                    <div
+                        onClick={() => { if (!open) { setOpen(true); setTimeout(() => inputRef.current?.focus(), 0) } }}
                         style={{
-                            background: 'none',
-                            border: 'none',
-                            outline: 'none',
-                            fontSize: '13px',
-                            color: 'var(--color-text-primary)',
-                            width: '100%',
-                            fontFamily: 'var(--font-body)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            padding: '8px 14px',
+                            borderRadius: open ? '10px 10px 0 0' : '10px',
+                            backgroundColor: 'var(--color-bg-card)',
+                            borderTop: `1px solid ${open ? 'var(--color-primary)' : 'var(--color-border)'}`,
+                            borderLeft: `1px solid ${open ? 'var(--color-primary)' : 'var(--color-border)'}`,
+                            borderRight: `1px solid ${open ? 'var(--color-primary)' : 'var(--color-border)'}`,
+                            borderBottom: open && hasQuery ? '1px solid var(--color-border)' : `1px solid ${open ? 'var(--color-primary)' : 'var(--color-border)'}`,
+                            cursor: 'text',
+                            transition: 'border-color 0.15s',
                         }}
-                    />
-                    {open && query ? (
-                        <button onClick={(e) => { e.stopPropagation(); setQuery(''); setResults(null); inputRef.current?.focus() }} style={{
-                            background: 'none', border: 'none', cursor: 'pointer', padding: '2px',
-                            color: 'var(--color-text-muted)', display: 'flex', flexShrink: 0,
-                        }}>
-                            <X size={14} />
-                        </button>
-                    ) : (
-                        <kbd style={{
-                            fontSize: '10px',
-                            padding: '2px 6px',
-                            borderRadius: '4px',
-                            backgroundColor: 'var(--color-bg-elevated)',
-                            color: 'var(--color-text-muted)',
-                            border: '1px solid var(--color-border)',
-                            fontFamily: 'monospace',
-                            flexShrink: 0,
-                        }}>⌘K</kbd>
-                    )}
-                </div>
+                    >
+                        {searching ? (
+                            <Loader2 size={15} style={{ color: 'var(--color-primary)', flexShrink: 0, animation: 'spin 1s linear infinite' }} />
+                        ) : (
+                            <Search size={15} style={{ color: 'var(--color-text-muted)', flexShrink: 0 }} />
+                        )}
+                        <input
+                            ref={inputRef}
+                            type="text"
+                            placeholder="Search people, clubs, events..."
+                            value={query}
+                            onChange={e => setQuery(e.target.value)}
+                            onFocus={() => setOpen(true)}
+                            onKeyDown={handleKeyDown}
+                            style={{
+                                background: 'none',
+                                border: 'none',
+                                outline: 'none',
+                                fontSize: '13px',
+                                color: 'var(--color-text-primary)',
+                                width: '100%',
+                                fontFamily: 'var(--font-body)',
+                            }}
+                        />
+                        {open && query ? (
+                            <button onClick={(e) => { e.stopPropagation(); setQuery(''); setResults(null); inputRef.current?.focus() }} style={{
+                                background: 'none', border: 'none', cursor: 'pointer', padding: '2px',
+                                color: 'var(--color-text-muted)', display: 'flex', flexShrink: 0,
+                            }}>
+                                <X size={14} />
+                            </button>
+                        ) : (
+                            <kbd style={{
+                                fontSize: '10px',
+                                padding: '2px 6px',
+                                borderRadius: '4px',
+                                backgroundColor: 'var(--color-bg-elevated)',
+                                color: 'var(--color-text-muted)',
+                                border: '1px solid var(--color-border)',
+                                fontFamily: 'monospace',
+                                flexShrink: 0,
+                            }}>⌘K</kbd>
+                        )}
+                    </div>
 
-                {/* Search Results Dropdown */}
-                {open && hasQuery && (
+                    {/* Search Results Dropdown */}
+                    {open && hasQuery && (
                     <div style={{
                         position: 'absolute',
                         top: '100%',
@@ -284,7 +289,7 @@ export default function TopBar() {
                                                 >
                                                     <div style={{
                                                         width: '32px', height: '32px', borderRadius: '50%', flexShrink: 0,
-                                                        background: p.avatar_url ? `url(${p.avatar_url}) center/cover` : 'linear-gradient(135deg, var(--color-primary), var(--color-accent))',
+                                                        background: p.avatar_url ? `url(${p.avatar_url}) center/cover` : 'var(--color-primary)',
                                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                                                         color: 'white', fontSize: '12px', fontWeight: 700,
                                                     }}>
@@ -328,7 +333,7 @@ export default function TopBar() {
                                                 >
                                                     <div style={{
                                                         width: '32px', height: '32px', borderRadius: '8px', flexShrink: 0,
-                                                        background: c.avatar_url ? `url(${c.avatar_url}) center/cover` : 'linear-gradient(135deg, var(--color-secondary), var(--color-primary))',
+                                                        background: c.avatar_url ? `url(${c.avatar_url}) center/cover` : 'var(--color-primary)',
                                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                                                         color: 'white', fontSize: '12px', fontWeight: 700,
                                                     }}>
@@ -449,6 +454,7 @@ export default function TopBar() {
                         )}
                     </div>
                 )}
+                </div>
             </div>
 
             {/* Right Side */}
@@ -486,7 +492,7 @@ export default function TopBar() {
                     justifyContent: 'center',
                     background: profile?.avatar_url
                         ? `url(${profile.avatar_url}) center/cover`
-                        : 'linear-gradient(135deg, var(--color-primary), var(--color-accent))',
+                        : 'var(--color-primary)',
                     color: 'white',
                     fontSize: '13px',
                     fontWeight: 700,

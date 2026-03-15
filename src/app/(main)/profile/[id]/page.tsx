@@ -190,7 +190,7 @@ export default function ProfilePage() {
                 {/* Cover */}
                 <div style={{
                     height: '240px', borderRadius: '32px', position: 'relative', overflow: 'hidden',
-                    background: profile.cover_url ? `url(${profile.cover_url}) center/cover` : 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                    background: profile.cover_url ? `url(${profile.cover_url}) center/cover` : 'var(--color-primary)',
                     boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
                 }} />
 
@@ -201,7 +201,7 @@ export default function ProfilePage() {
                     <div style={{
                         width: '144px', height: '144px', borderRadius: '50%', flexShrink: 0,
                         display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '48px', fontWeight: 800,
-                        background: profile.avatar_url ? `url(${profile.avatar_url}) center/cover` : 'linear-gradient(135deg, var(--color-primary), var(--color-accent))',
+                        background: profile.avatar_url ? `url(${profile.avatar_url}) center/cover` : 'var(--color-primary)',
                         border: '6px solid var(--color-bg-primary)', color: 'white',
                         boxShadow: '0 8px 24px rgba(0,0,0,0.2)'
                     }}>
@@ -250,7 +250,7 @@ export default function ProfilePage() {
                                             style={{
                                                 display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 24px', borderRadius: '16px',
                                                 fontSize: '14px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s',
-                                                background: isFollowing ? 'var(--color-bg-elevated)' : 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                                                background: isFollowing ? 'var(--color-bg-elevated)' : 'var(--color-primary)',
                                                 color: isFollowing ? 'var(--color-text-secondary)' : 'white',
                                                 border: isFollowing ? '1px solid var(--color-border)' : 'none',
                                                 boxShadow: isFollowing ? 'none' : '0 4px 15px rgba(99, 102, 241, 0.3)'
@@ -411,7 +411,7 @@ export default function ProfilePage() {
                             style={{
                                 display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 32px', borderRadius: '16px',
                                 fontSize: '14px', fontWeight: 600, color: 'white', border: 'none',
-                                background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+                                background: 'var(--color-primary)',
                                 cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.7 : 1,
                                 boxShadow: '0 4px 15px rgba(99, 102, 241, 0.3)'
                             }}
@@ -456,7 +456,7 @@ export default function ProfilePage() {
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
                                     <div style={{
                                         width: '40px', height: '40px', borderRadius: '50%',
-                                        background: profile.avatar_url ? `url(${profile.avatar_url}) center/cover` : 'linear-gradient(135deg, var(--color-primary), var(--color-accent))',
+                                        background: profile.avatar_url ? `url(${profile.avatar_url}) center/cover` : 'var(--color-primary)',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '14px', fontWeight: 600
                                     }}>
                                         {!profile.avatar_url && (profile.full_name?.[0] || 'U')}
@@ -527,7 +527,7 @@ export default function ProfilePage() {
                                     >
                                         <div style={{
                                             width: '44px', height: '44px', borderRadius: '50%', flexShrink: 0,
-                                            background: p.avatar_url ? `url(${p.avatar_url}) center/cover` : 'linear-gradient(135deg, var(--color-primary), var(--color-accent))',
+                                            background: p.avatar_url ? `url(${p.avatar_url}) center/cover` : 'var(--color-primary)',
                                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                                             color: 'white', fontSize: '16px', fontWeight: 700,
                                         }}>
